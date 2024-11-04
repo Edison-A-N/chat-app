@@ -1,0 +1,15 @@
+.app {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+/* 确保根元素也没有默认边距 */
+:global(body), :global(#root) {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+}
