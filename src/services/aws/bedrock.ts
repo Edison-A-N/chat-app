@@ -1,18 +1,26 @@
 import { BedrockRuntimeClient, InvokeModelCommand, InvokeModelWithResponseStreamCommand } from "@aws-sdk/client-bedrock-runtime";
 import { PromptResponse } from './types';
-import { invoke } from '@tauri-apps/api/core';
-import { CONFIG } from '../../config/config';
+import { ConfigLoader } from '../../config';
+
 
 // Create a function to initialize the client
 async function createBedrockClient() {
     try {
-        const [accessKeyId, secretAccessKey] = await invoke<[string, string]>('get_aws_credentials');
+        // Ensure the config is loaded before accessing it
+        await ConfigLoader.getInstance().loadConfig();
+
+        const config = ConfigLoader.getInstance().getConfig();
+        const awsConfig = config.aws;
+
+        console.log('Creating Bedrock client with region:', awsConfig.region);
+        console.log('Access key ID:', awsConfig.credentials.accessKeyId);
+        console.log('Secret access key:', awsConfig.credentials.secretAccessKey);
 
         return new BedrockRuntimeClient({
-            region: CONFIG.AWS.REGION,
+            region: awsConfig.region,
             credentials: {
-                accessKeyId,
-                secretAccessKey,
+                accessKeyId: awsConfig.credentials.accessKeyId,
+                secretAccessKey: awsConfig.credentials.secretAccessKey
             }
         });
     } catch (error) {
@@ -35,10 +43,12 @@ async function getClient() {
 export const getResponseFromBedrock = async (prompt: string): Promise<PromptResponse> => {
     try {
         const bedrockClient = await getClient();
+        const config = ConfigLoader.getInstance().getConfig();
+        const bedrockConfig = config.aws.bedrock;
 
         const payload = {
-            max_tokens: CONFIG.AI.BEDROCK.MAX_TOKENS,
-            anthropic_version: CONFIG.AI.BEDROCK.ANTHROPIC_VERSION,
+            max_tokens: bedrockConfig.maxTokens,
+            anthropic_version: bedrockConfig.anthropicVersion,
             messages: [
                 {
                     role: "user",
@@ -48,7 +58,7 @@ export const getResponseFromBedrock = async (prompt: string): Promise<PromptResp
         };
 
         const command = new InvokeModelCommand({
-            modelId: CONFIG.AI.BEDROCK.MODEL_ID,
+            modelId: bedrockConfig.modelId,
             body: JSON.stringify(payload),
         });
 
@@ -79,10 +89,12 @@ export const getStreamingResponseFromBedrock = async (
 ): Promise<void> => {
     try {
         const bedrockClient = await getClient();
+        const config = ConfigLoader.getInstance().getConfig();
+        const bedrockConfig = config.aws.bedrock;
 
         const payload = {
-            max_tokens: CONFIG.AI.BEDROCK.MAX_TOKENS,
-            anthropic_version: CONFIG.AI.BEDROCK.ANTHROPIC_VERSION,
+            max_tokens: bedrockConfig.maxTokens,
+            anthropic_version: bedrockConfig.anthropicVersion,
             messages: [
                 {
                     role: "user",
@@ -92,7 +104,7 @@ export const getStreamingResponseFromBedrock = async (
         };
 
         const command = new InvokeModelWithResponseStreamCommand({
-            modelId: CONFIG.AI.BEDROCK.MODEL_ID,
+            modelId: bedrockConfig.modelId,
             body: JSON.stringify(payload),
             contentType: "application/json",
             accept: "application/json",

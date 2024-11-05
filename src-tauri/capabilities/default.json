@@ -4,7 +4,33 @@
   "description": "Capability for the main window",
   "windows": ["main"],
   "permissions": [
-    "core:default",
-    "core:app:default"
+    "fs:default",
+    "fs:allow-write-text-file",
+    {
+      "identifier": "fs:allow-write-text-file",
+      "allow": [
+        {
+          "path": "$APPDATA/*"
+        }
+      ]
+    },
+    "fs:allow-read-text-file",
+    {
+      "identifier": "fs:allow-read-text-file",
+      "allow": [
+        {
+          "path": "$APPDATA/*"
+        }
+      ]
+    },
+    "core:path:allow-resolve-directory",
+    {
+      "identifier": "core:path:allow-resolve-directory",
+      "allow": [
+        {
+          "path": "$APPDATA"
+        }
+      ]
+    }
   ]
 }
