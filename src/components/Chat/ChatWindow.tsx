@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, Input, Button, List, Avatar, message } from 'antd';
-import { SendOutlined, UserOutlined, RobotOutlined } from '@ant-design/icons';
+import { SendOutlined, UserOutlined, RobotOutlined, StopOutlined } from '@ant-design/icons';
 import { BedrockService } from '../../services/aws/bedrock';
 import styles from './ChatWindow.module.css';
 
@@ -17,6 +17,7 @@ const ChatWindow: React.FC = () => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const bedrockService = BedrockService.getInstance();
     const [currentStreamingContent, setCurrentStreamingContent] = useState('');
+    const [isGenerating, setIsGenerating] = useState(false);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -38,6 +39,7 @@ const ChatWindow: React.FC = () => {
         setMessages(prev => [...prev, userMessage]);
         setInputValue('');
         setLoading(true);
+        setIsGenerating(true);
         setCurrentStreamingContent('');
 
         try {
@@ -59,6 +61,7 @@ const ChatWindow: React.FC = () => {
                             }
                             return msg;
                         }));
+                        setIsGenerating(false);
                     }
                 }
             );
@@ -67,8 +70,21 @@ const ChatWindow: React.FC = () => {
             message.error('发送消息失败，请检查配置或网络连接');
         } finally {
             setLoading(false);
+            setIsGenerating(false);
             setCurrentStreamingContent('');
         }
+    };
+
+    const handleStop = () => {
+        bedrockService.abortStreaming();
+        setMessages(prev => prev.map((msg, index) => {
+            if (index === prev.length - 1) {
+                return { ...msg, content: currentStreamingContent };
+            }
+            return msg;
+        }));
+        setIsGenerating(false);
+        setLoading(false);
     };
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -129,12 +145,12 @@ const ChatWindow: React.FC = () => {
                 />
                 <Button
                     type="primary"
-                    icon={<SendOutlined />}
-                    onClick={handleSend}
-                    loading={loading}
-                    disabled={!inputValue.trim()}
+                    icon={isGenerating ? <StopOutlined /> : <SendOutlined />}
+                    onClick={isGenerating ? handleStop : handleSend}
+                    loading={loading && !isGenerating}
+                    disabled={!isGenerating && !inputValue.trim()}
                 >
-                    发送
+                    {isGenerating ? '停止' : '发送'}
                 </Button>
             </div>
         </Card>

@@ -83,11 +83,14 @@ export const getResponseFromBedrock = async (prompt: string): Promise<PromptResp
     }
 };
 
+let streamController: AbortController | null = null;
+
 export const getStreamingResponseFromBedrock = async (
     prompt: string,
     onChunk: (chunk: string, isComplete: boolean) => void
 ): Promise<void> => {
     try {
+        streamController = new AbortController();
         const bedrockClient = await getClient();
         const config = ConfigLoader.getInstance().getConfig();
         const bedrockConfig = config.aws.bedrock;
@@ -119,6 +122,9 @@ export const getStreamingResponseFromBedrock = async (
         }
 
         for await (const chunk of response.body) {
+            if (streamController?.signal.aborted) {
+                throw new Error('Stream aborted');
+            }
             if (!chunk.chunk?.bytes) {
                 continue;
             }
@@ -138,8 +144,20 @@ export const getStreamingResponseFromBedrock = async (
         }
 
     } catch (error) {
+        if ((error as Error).message === 'Stream aborted') {
+            console.log('Stream was aborted');
+            return;
+        }
         console.error('Error:', error);
         throw error;
+    } finally {
+        streamController = null;
+    }
+};
+
+export const abortStreamingResponse = () => {
+    if (streamController) {
+        streamController.abort();
     }
 };
 
@@ -175,5 +193,9 @@ export class BedrockService {
             console.error('Stream chat error:', error);
             throw error;
         }
+    }
+
+    public abortStreaming(): void {
+        abortStreamingResponse();
     }
 }
