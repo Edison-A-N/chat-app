@@ -9,6 +9,8 @@ A cross-platform desktop chat application built with Tauri + React + TypeScript,
 - 💻 Cross-platform support (Windows, macOS, Linux)
 - 🎯 TypeScript for better development experience
 - ⚛️ Modern React architecture
+- 🎨 Beautiful UI with Ant Design
+- 📱 Responsive design for different screen sizes
 
 ## Prerequisites
 
@@ -16,7 +18,10 @@ A cross-platform desktop chat application built with Tauri + React + TypeScript,
 - [Rust](https://www.rust-lang.org/tools/install)
 - [VS Code](https://code.visualstudio.com/) (recommended)
 - AWS Account with Bedrock access
+- [Ant Design](https://ant.design/) UI framework
 
 For detailed system requirements and setup instructions, please refer to the [Tauri Prerequisites Guide](https://v1.tauri.app/v1/guides/getting-started/prerequisites).
 
 ## Project Setup
+
+1. Install dependencies:
