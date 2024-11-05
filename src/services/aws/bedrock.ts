@@ -142,3 +142,38 @@ export const getStreamingResponseFromBedrock = async (
         throw error;
     }
 };
+
+export class BedrockService {
+    private static instance: BedrockService;
+
+    private constructor() { }
+
+    public static getInstance(): BedrockService {
+        if (!BedrockService.instance) {
+            BedrockService.instance = new BedrockService();
+        }
+        return BedrockService.instance;
+    }
+
+    public async chat(prompt: string): Promise<string> {
+        try {
+            const response = await getResponseFromBedrock(prompt);
+            return response.completion;
+        } catch (error) {
+            console.error('Chat error:', error);
+            throw error;
+        }
+    }
+
+    public async streamChat(
+        prompt: string,
+        onChunk: (chunk: string, isComplete: boolean) => void
+    ): Promise<void> {
+        try {
+            await getStreamingResponseFromBedrock(prompt, onChunk);
+        } catch (error) {
+            console.error('Stream chat error:', error);
+            throw error;
+        }
+    }
+}

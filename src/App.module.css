@@ -1,9 +1,8 @@
 .app {
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-    margin: 0;
-    padding: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 /* 确保根元素也没有默认边距 */
@@ -12,4 +11,21 @@
     padding: 0;
     height: 100vh;
     overflow: hidden;
+}
+
+.layout {
+    min-height: 100vh;
+}
+
+.content {
+    flex: 1;
+    padding: 24px;
+    overflow: auto;
+}
+
+.loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }

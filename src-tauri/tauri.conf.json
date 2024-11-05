@@ -12,9 +12,13 @@
   "app": {
     "windows": [
       {
-        "title": "chat-app",
-        "width": 800,
-        "height": 600
+        "fullscreen": false,
+        "height": 800,
+        "resizable": true,
+        "title": "AI Chat Desktop",
+        "width": 1200,
+        "minWidth": 1000,
+        "minHeight": 600
       }
     ]
   },

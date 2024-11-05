@@ -1,0 +1,45 @@
+.messageList {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 8px;
+    margin-bottom: 12px;
+    max-height: calc(100vh - 200px);
+}
+
+.messageContent {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.inputArea {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-top: auto;
+    background: #fff;
+    padding-top: 8px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.textarea {
+    flex: 1;
+    resize: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    min-height: 40px;
+}
+
+.userMessage {
+    justify-content: flex-end;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 8px;
+    margin: 8px 0;
+}
+
+.assistantMessage {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 8px;
+    margin: 8px 0;
+}

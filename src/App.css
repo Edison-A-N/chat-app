@@ -114,3 +114,12 @@ button {
     background-color: #0f0f0f69;
   }
 }
+
+.ant-layout {
+  display: flex !important;
+}
+
+.ant-layout-content {
+  padding: 24px;
+  overflow: auto;
+}
