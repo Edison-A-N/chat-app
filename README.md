@@ -11,12 +11,13 @@ A cross-platform desktop chat application built with Tauri + React + TypeScript,
 - ⚛️ Modern React architecture
 - 🎨 Beautiful UI with Ant Design
 - 📱 Responsive design for different screen sizes
+- 🤖 **All code is AI-implemented** ✨
 
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) (v16 or higher)
 - [Rust](https://www.rust-lang.org/tools/install)
-- [VS Code](https://code.visualstudio.com/) (recommended)
+- [Cursor](https://cursor.sh/) (recommended)
 - AWS Account with Bedrock access
 - [Ant Design](https://ant.design/) UI framework
 
