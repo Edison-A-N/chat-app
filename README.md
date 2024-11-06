@@ -26,3 +26,11 @@ For detailed system requirements and setup instructions, please refer to the [Ta
 ## Project Setup
 
 1. Install dependencies:
+
+```
+npm install -g @tauri-apps/cli
+```
+
+```
+npm install vite --save-dev
+```
