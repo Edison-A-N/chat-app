@@ -15,6 +15,7 @@ const ChatWindow: React.FC = () => {
     const [inputValue, setInputValue] = useState('');
     const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<any>(null);
     const bedrockService = BedrockService.getInstance();
     const [currentStreamingContent, setCurrentStreamingContent] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
@@ -26,6 +27,10 @@ const ChatWindow: React.FC = () => {
     useEffect(() => {
         scrollToBottom();
     }, [messages, currentStreamingContent]);
+
+    useEffect(() => {
+        inputRef.current?.focus();
+    }, []);
 
     const handleSend = async () => {
         if (!inputValue.trim()) return;
@@ -135,6 +140,7 @@ const ChatWindow: React.FC = () => {
 
             <div className={styles.inputArea}>
                 <Input.TextArea
+                    ref={inputRef}
                     value={inputValue}
                     onChange={e => setInputValue(e.target.value)}
                     onKeyPress={handleKeyPress}
