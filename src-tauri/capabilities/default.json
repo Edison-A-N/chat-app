@@ -23,6 +23,16 @@
         }
       ]
     },
+    "core:path:default",
+    "core:path:allow-join",
+    {
+      "identifier": "core:path:allow-join",
+      "allow": [
+        {
+          "path": "$APPDATA"
+        }
+      ]
+    },
     "core:path:allow-resolve-directory",
     {
       "identifier": "core:path:allow-resolve-directory",

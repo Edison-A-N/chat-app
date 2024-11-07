@@ -1,5 +1,5 @@
 import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
-import { appDataDir } from '@tauri-apps/api/path';
+import { appDataDir, join } from '@tauri-apps/api/path';
 import { UserConfig, DeepPartial } from '../types/config';
 import { defaultConfig } from './defaultConfig';
 
@@ -37,7 +37,7 @@ export class ConfigLoader {
 
     private async getConfigPath(): Promise<string> {
         const appDataDirPath = await appDataDir();
-        return `${appDataDirPath}/${ConfigLoader.CONFIG_FILE}`;
+        return await join(appDataDirPath, ConfigLoader.CONFIG_FILE);
     }
 
     private async initializeConfig(): Promise<void> {
