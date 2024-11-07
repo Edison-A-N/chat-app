@@ -25,7 +25,7 @@ const ChatWindow: React.FC = () => {
 
     useEffect(() => {
         scrollToBottom();
-    }, [messages]);
+    }, [messages, currentStreamingContent]);
 
     const handleSend = async () => {
         if (!inputValue.trim()) return;
@@ -109,7 +109,7 @@ const ChatWindow: React.FC = () => {
                 overflow: 'hidden'
             }}
         >
-            <div className={styles.messageList}>
+            <div className={`${styles.messageList} custom-scroll`}>
                 <List
                     itemLayout="horizontal"
                     dataSource={messages}
