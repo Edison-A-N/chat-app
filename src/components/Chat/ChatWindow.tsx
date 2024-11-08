@@ -10,7 +10,11 @@ interface ChatMessage {
     timestamp: number;
 }
 
-const ChatWindow: React.FC = () => {
+interface ChatWindowProps {
+    onNewChat?: () => void;
+}
+
+const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [loading, setLoading] = useState(false);
@@ -104,6 +108,29 @@ const ChatWindow: React.FC = () => {
             handleSend();
         }
     };
+
+    const handleNewChat = () => {
+        setMessages([]);
+        setInputValue('');
+        setCurrentStreamingContent('');
+        setIsGenerating(false);
+        setLoading(false);
+        if (onNewChat) {
+            onNewChat();
+        }
+    };
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.ctrlKey && e.key === 'n') {
+                e.preventDefault();
+                handleNewChat();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     return (
         <Card

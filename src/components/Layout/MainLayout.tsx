@@ -1,56 +1,24 @@
-import React, { useState } from 'react';
-import { Layout, Button, Drawer } from 'antd';
-import { SettingOutlined } from '@ant-design/icons';
-import ConfigEditor from '../ConfigEditor';
+import React from 'react';
+import { Layout } from 'antd';
+import ChatWindow from '../Chat/ChatWindow';
+import Sidebar from './Sidebar';
+import styles from './MainLayout.module.css';
 
 const { Sider, Content } = Layout;
 
-interface MainLayoutProps {
-    children: React.ReactNode;
-}
-
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-    const [showSettings, setShowSettings] = useState(false);
+const MainLayout: React.FC = () => {
+    const handleNewChat = () => {
+        // 这个引用会传递给 ChatWindow
+    };
 
     return (
-        <Layout style={{ height: '100vh' }}>
-            <Sider
-                theme="light"
-                width={250}
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    borderRight: '1px solid #f0f0f0'
-                }}
-            >
-                <div style={{ flex: 1, padding: '20px' }}>
-                    {/* 这里可以放置聊天历史或其他导航内容 */}
-                </div>
-                <div style={{ padding: '16px', borderTop: '1px solid #f0f0f0' }}>
-                    <Button
-                        type="text"
-                        icon={<SettingOutlined />}
-                        onClick={() => setShowSettings(true)}
-                        block
-                    >
-                        系统设置
-                    </Button>
-                </div>
+        <Layout className={styles.layout}>
+            <Sider width={250} theme="light">
+                <Sidebar onNewChat={handleNewChat} />
             </Sider>
-
-            <Content style={{ padding: '24px', overflow: 'auto' }}>
-                {children}
+            <Content>
+                <ChatWindow onNewChat={handleNewChat} />
             </Content>
-
-            <Drawer
-                title="系统设置"
-                placement="right"
-                width={650}
-                onClose={() => setShowSettings(false)}
-                open={showSettings}
-            >
-                <ConfigEditor onSaved={() => setShowSettings(false)} />
-            </Drawer>
         </Layout>
     );
 };

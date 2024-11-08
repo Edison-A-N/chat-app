@@ -10,6 +10,7 @@ const { Content } = Layout;
 const App: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [collapsed, setCollapsed] = useState(true);
+    const [chatKey, setChatKey] = useState(0);
 
     useEffect(() => {
         const initConfig = async () => {
@@ -25,6 +26,10 @@ const App: React.FC = () => {
         initConfig();
     }, []);
 
+    const handleNewChat = () => {
+        setChatKey(prev => prev + 1);
+    };
+
     if (loading) {
         return (
             <div className={styles.loadingContainer}>
@@ -35,9 +40,16 @@ const App: React.FC = () => {
 
     return (
         <Layout className={styles.layout}>
-            <Sidebar collapsed={collapsed} onCollapse={setCollapsed} />
+            <Sidebar
+                collapsed={collapsed}
+                onCollapse={setCollapsed}
+                onNewChat={handleNewChat}
+            />
             <Content className={styles.content}>
-                <ChatWindow />
+                <ChatWindow
+                    key={chatKey}
+                    onNewChat={handleNewChat}
+                />
             </Content>
         </Layout>
     );

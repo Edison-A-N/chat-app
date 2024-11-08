@@ -2,6 +2,17 @@
   position: relative;
   height: 100vh;
   background: #fff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.sidebarHeader {
+  padding: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.trigger {
+  color: #fff;
 }
 
 .collapseButton {
@@ -9,10 +20,34 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
+.collapseButton button {
+  height: 40px;
+  color: #595959;
+}
+
+.collapseButton button:hover {
+  color: #1890ff;
+  background: #e6f7ff;
+}
+
 .sidebarContent {
+  padding: 8px 0;
   flex: 1;
   overflow-y: auto;
   height: calc(100vh - 120px);
+}
+
+.actionButton {
+  height: 40px;
+  margin: 4px 0;
+  text-align: left;
+  padding-left: 24px;
+  color: #595959;
+}
+
+.actionButton:hover {
+  color: #1890ff;
+  background: #e6f7ff;
 }
 
 .settingsButton {
@@ -25,10 +60,13 @@
 }
 
 .settingsButton button {
-  height: 48px;
-  color: rgba(0, 0, 0, 0.65);
+  height: 40px;
+  text-align: left;
+  padding-left: 24px;
+  color: #595959;
 }
 
 .settingsButton button:hover {
   color: #1890ff;
+  background: #e6f7ff;
 }
