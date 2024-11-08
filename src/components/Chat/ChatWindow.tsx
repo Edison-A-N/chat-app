@@ -33,8 +33,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
     }, [messages, currentStreamingContent]);
 
     useEffect(() => {
-        inputRef.current?.focus();
+        const timer = setTimeout(() => {
+            inputRef.current?.focus();
+        }, 100);
+
+        return () => clearTimeout(timer);
     }, []);
+
+    const focusInput = () => {
+        setTimeout(() => {
+            inputRef.current?.focus();
+        }, 100);
+    };
 
     const handleSend = async () => {
         if (!inputValue.trim()) return;
@@ -77,12 +87,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                             return msg;
                         }));
                         setIsGenerating(false);
+                        focusInput();
                     }
                 }
             );
         } catch (error) {
             console.error('Chat error:', error);
             message.error('发送消息失败，请检查配置或网络连接');
+            focusInput();
         } finally {
             setLoading(false);
             setIsGenerating(false);
@@ -100,6 +112,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
         }));
         setIsGenerating(false);
         setLoading(false);
+        focusInput();
     };
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -181,6 +194,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                     autoSize={{ minRows: 2, maxRows: 6 }}
                     disabled={loading}
                     className={styles.textarea}
+                    autoFocus
                 />
                 <Button
                     type="primary"
