@@ -55,8 +55,14 @@ const ChatWindow: React.FC = () => {
             };
             setMessages(prev => [...prev, assistantMessage]);
 
+            const messageHistory = messages.map(msg => ({
+                role: msg.role,
+                content: msg.content
+            }));
+            messageHistory.push({ role: 'user', content: inputValue.trim() });
+
             await bedrockService.streamChat(
-                inputValue.trim(),
+                messageHistory,
                 (chunk: string, isComplete: boolean) => {
                     setCurrentStreamingContent(chunk);
                     if (isComplete) {

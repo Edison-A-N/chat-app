@@ -2,6 +2,10 @@ import { BedrockRuntimeClient, InvokeModelCommand, InvokeModelWithResponseStream
 import { PromptResponse } from './types';
 import { ConfigLoader } from '../../config';
 
+interface Message {
+    role: "user" | "assistant";
+    content: string;
+}
 
 // Create a function to initialize the client
 async function createBedrockClient() {
@@ -40,7 +44,7 @@ async function getClient() {
     return client;
 }
 
-export const getResponseFromBedrock = async (prompt: string): Promise<PromptResponse> => {
+export const getResponseFromBedrock = async (messages: Message[]): Promise<PromptResponse> => {
     try {
         const bedrockClient = await getClient();
         const config = ConfigLoader.getInstance().getConfig();
@@ -49,12 +53,7 @@ export const getResponseFromBedrock = async (prompt: string): Promise<PromptResp
         const payload = {
             max_tokens: bedrockConfig.maxTokens,
             anthropic_version: bedrockConfig.anthropicVersion,
-            messages: [
-                {
-                    role: "user",
-                    content: prompt,
-                },
-            ],
+            messages: messages,
         };
 
         const command = new InvokeModelCommand({
@@ -86,7 +85,7 @@ export const getResponseFromBedrock = async (prompt: string): Promise<PromptResp
 let streamController: AbortController | null = null;
 
 export const getStreamingResponseFromBedrock = async (
-    prompt: string,
+    messages: Message[],
     onChunk: (chunk: string, isComplete: boolean) => void
 ): Promise<void> => {
     try {
@@ -98,12 +97,7 @@ export const getStreamingResponseFromBedrock = async (
         const payload = {
             max_tokens: bedrockConfig.maxTokens,
             anthropic_version: bedrockConfig.anthropicVersion,
-            messages: [
-                {
-                    role: "user",
-                    content: prompt,
-                },
-            ]
+            messages: messages,
         };
 
         const command = new InvokeModelWithResponseStreamCommand({
@@ -173,9 +167,9 @@ export class BedrockService {
         return BedrockService.instance;
     }
 
-    public async chat(prompt: string): Promise<string> {
+    public async chat(messages: Message[]): Promise<string> {
         try {
-            const response = await getResponseFromBedrock(prompt);
+            const response = await getResponseFromBedrock(messages);
             return response.completion;
         } catch (error) {
             console.error('Chat error:', error);
@@ -184,11 +178,11 @@ export class BedrockService {
     }
 
     public async streamChat(
-        prompt: string,
+        messages: Message[],
         onChunk: (chunk: string, isComplete: boolean) => void
     ): Promise<void> {
         try {
-            await getStreamingResponseFromBedrock(prompt, onChunk);
+            await getStreamingResponseFromBedrock(messages, onChunk);
         } catch (error) {
             console.error('Stream chat error:', error);
             throw error;
