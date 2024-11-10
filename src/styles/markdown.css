@@ -1,0 +1,33 @@
+.markdown-content {
+  color: rgba(0, 0, 0, 0.88);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.markdown-content p {
+  margin-bottom: 16px;
+}
+
+.markdown-content code {
+  background-color: #f6f8fa;
+  border-radius: 3px;
+  padding: 0.2em 0.4em;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, monospace;
+  font-size: 85%;
+  color: #24292f;
+}
+
+.markdown-content pre {
+  background-color: #f6f8fa;
+  border-radius: 6px;
+  padding: 16px;
+  overflow: auto;
+  margin-bottom: 16px;
+}
+
+.markdown-content pre code {
+  background-color: transparent;
+  padding: 0;
+  white-space: pre;
+  color: #24292f;
+}

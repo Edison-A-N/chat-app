@@ -3,6 +3,8 @@ import { Card, Input, Button, List, Avatar, message } from 'antd';
 import { SendOutlined, UserOutlined, RobotOutlined, StopOutlined } from '@ant-design/icons';
 import { BedrockService } from '../../services/aws/bedrock';
 import styles from './ChatWindow.module.css';
+import ReactMarkdown from 'react-markdown';
+import '../../styles/markdown.css';
 
 interface ChatMessage {
     role: 'user' | 'assistant';
@@ -172,9 +174,17 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                                 }
                                 description={
                                     <div className={styles.messageContent}>
-                                        {index === messages.length - 1 && item.role === 'assistant'
-                                            ? currentStreamingContent || item.content
-                                            : item.content}
+                                        {item.role === 'user' ? (
+                                            (index === messages.length - 1
+                                                ? currentStreamingContent || item.content
+                                                : item.content)
+                                        ) : (
+                                            <ReactMarkdown className="markdown-content">
+                                                {index === messages.length - 1
+                                                    ? currentStreamingContent || item.content
+                                                    : item.content}
+                                            </ReactMarkdown>
+                                        )}
                                     </div>
                                 }
                             />

@@ -26,8 +26,11 @@
 }
 
 .messageContent {
-    white-space: pre-wrap;
+    color: rgba(0, 0, 0, 0.88);
+    font-size: 14px;
+    line-height: 1.6;
     word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .inputArea {
@@ -57,7 +60,7 @@
 }
 
 .assistantMessage {
-    background-color: #fff;
+    background-color: #ffffff;
     border-radius: 8px;
     padding: 8px;
     margin: 8px 0;
