@@ -15,9 +15,10 @@ interface SidebarProps {
     collapsed: boolean;
     onCollapse: (collapsed: boolean) => void;
     onNewChat: () => void;
+    onSettingsClick: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse, onNewChat }) => {
+const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse, onNewChat, onSettingsClick }) => {
     return (
         <Sider
             trigger={null}
@@ -60,6 +61,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse, onNewChat }) =
                 <Button
                     type="text"
                     icon={<SettingOutlined />}
+                    onClick={onSettingsClick}
                     block
                 >
                     {!collapsed && '设置'}

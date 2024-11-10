@@ -1,16 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Spin } from 'antd';
-import ChatWindow from './components/Chat/ChatWindow';
-import Sidebar from './components/Sidebar';
+import { Spin } from 'antd';
+import MainLayout from './components/Layout/MainLayout';
 import { ConfigLoader } from './config/configLoader';
 import styles from './App.module.css';
 
-const { Content } = Layout;
-
 const App: React.FC = () => {
     const [loading, setLoading] = useState(true);
-    const [collapsed, setCollapsed] = useState(true);
-    const [chatKey, setChatKey] = useState(0);
 
     useEffect(() => {
         const initConfig = async () => {
@@ -26,10 +21,6 @@ const App: React.FC = () => {
         initConfig();
     }, []);
 
-    const handleNewChat = () => {
-        setChatKey(prev => prev + 1);
-    };
-
     if (loading) {
         return (
             <div className={styles.loadingContainer}>
@@ -38,21 +29,7 @@ const App: React.FC = () => {
         );
     }
 
-    return (
-        <Layout className={styles.layout}>
-            <Sidebar
-                collapsed={collapsed}
-                onCollapse={setCollapsed}
-                onNewChat={handleNewChat}
-            />
-            <Content className={styles.content}>
-                <ChatWindow
-                    key={chatKey}
-                    onNewChat={handleNewChat}
-                />
-            </Content>
-        </Layout>
-    );
+    return <MainLayout />;
 };
 
 export default App;
