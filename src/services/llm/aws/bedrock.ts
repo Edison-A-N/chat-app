@@ -1,7 +1,6 @@
 import { BedrockRuntimeClient, InvokeModelCommand, InvokeModelWithResponseStreamCommand } from "@aws-sdk/client-bedrock-runtime";
-import { PromptResponse } from './types';
-import { ConfigLoader } from '../../config';
-import { Message } from './types';
+import { PromptResponse, LLMService, Message } from '../types';
+import { ConfigLoader } from '../../../config/configLoader';
 
 // Create a function to initialize the client
 async function createBedrockClient() {
@@ -151,7 +150,7 @@ export const abortStreamingResponse = () => {
     }
 };
 
-export class BedrockService {
+export class BedrockService implements LLMService {
     private static instance: BedrockService;
 
     private constructor() { }

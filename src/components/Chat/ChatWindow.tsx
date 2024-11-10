@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, Input, Button, List, Avatar, message } from 'antd';
 import { SendOutlined, UserOutlined, RobotOutlined, StopOutlined } from '@ant-design/icons';
-import { BedrockService } from '../../services/aws/bedrock';
+import { LLMServiceFactoryImpl } from '../../services/llm/factory';
+import { ConfigLoader } from '../../config/configLoader';
 import styles from './ChatWindow.module.css';
 import ReactMarkdown from 'react-markdown';
 import '../../styles/markdown.css';
@@ -22,9 +23,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
     const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<any>(null);
-    const bedrockService = BedrockService.getInstance();
     const [currentStreamingContent, setCurrentStreamingContent] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
+
+    const config = ConfigLoader.getInstance().getConfig();
+    const llmService = LLMServiceFactoryImpl.getInstance().createService(config.llm.provider);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -77,7 +80,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
             }));
             messageHistory.push({ role: 'user', content: inputValue.trim() });
 
-            await bedrockService.streamChat(
+            await llmService.streamChat(
                 messageHistory,
                 (chunk: string, isComplete: boolean) => {
                     setCurrentStreamingContent(chunk);
@@ -105,7 +108,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
     };
 
     const handleStop = () => {
-        bedrockService.abortStreaming();
+        llmService.abortStreaming();
         setMessages(prev => prev.map((msg, index) => {
             if (index === prev.length - 1) {
                 return { ...msg, content: currentStreamingContent };

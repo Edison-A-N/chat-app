@@ -1,4 +1,4 @@
-import { UserConfig } from '../types/config';
+import { UserConfig } from '../config';
 
 export const defaultConfig: UserConfig = {
     aws: {
@@ -15,6 +15,12 @@ export const defaultConfig: UserConfig = {
             stopSequences: [],
             anthropicVersion: 'bedrock-2023-05-31'
         }
+    },
+    google: {
+        apiKey: ''
+    },
+    llm: {
+        provider: 'bedrock'
     },
     chat: {
         maxHistoryLength: 10,

@@ -17,14 +17,10 @@ export interface UserConfig {
     google: {
         apiKey: string;
     };
-    chat: {
-        maxHistoryLength: number;
-    };
     llm: {
         provider: 'bedrock' | 'gemini';
     };
+    chat: {
+        maxHistoryLength: number;
+    };
 }
-
-export type DeepPartial<T> = {
-    [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-};
