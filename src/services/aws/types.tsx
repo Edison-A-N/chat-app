@@ -1,6 +1,6 @@
-export interface PromptRequest {
-    prompt: string;
-    // Add other parameters as needed
+export interface Message {
+    role: "user" | "assistant";
+    content: string;
 }
 
 export interface PromptResponse {

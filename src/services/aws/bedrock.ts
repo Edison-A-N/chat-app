@@ -1,11 +1,7 @@
 import { BedrockRuntimeClient, InvokeModelCommand, InvokeModelWithResponseStreamCommand } from "@aws-sdk/client-bedrock-runtime";
 import { PromptResponse } from './types';
 import { ConfigLoader } from '../../config';
-
-interface Message {
-    role: "user" | "assistant";
-    content: string;
-}
+import { Message } from './types';
 
 // Create a function to initialize the client
 async function createBedrockClient() {
