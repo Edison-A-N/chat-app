@@ -17,7 +17,6 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
 
     loadConfig: async () => {
         if (get().loading) {
-            console.log('Config loading already in progress');
             return;
         }
 
@@ -58,7 +57,6 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
         try {
             await ConfigService.saveConfig(defaultConfig);
             set({ config: defaultConfig, loading: false });
-            console.log('Config reset to default');
         } catch (error) {
             console.error('Failed to reset config:', error);
             set({ config: defaultConfig, loading: false });

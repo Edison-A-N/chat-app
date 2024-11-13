@@ -45,11 +45,8 @@ export class ConfigService {
             const configStr = await readTextFile(configPath);
             const loadedConfig = JSON.parse(configStr) as DeepPartial<UserConfig>;
             const finalConfig = deepMerge(defaultConfig, loadedConfig);
-            console.log('Config loaded and merged:', finalConfig);
             return finalConfig;
         } catch (readError) {
-            console.log('Using default config, error:', readError);
-            // 静默写入默认配置
             try {
                 await this.saveConfig(defaultConfig);
             } catch (writeError) {
@@ -62,6 +59,5 @@ export class ConfigService {
     static async saveConfig(config: UserConfig): Promise<void> {
         const configPath = await this.getConfigPath();
         await writeTextFile(configPath, JSON.stringify(config, null, 2));
-        console.log('Config saved successfully');
     }
 }
