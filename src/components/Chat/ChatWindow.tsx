@@ -157,13 +157,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                 display: 'flex',
                 flexDirection: 'column'
             }}
-            bodyStyle={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                padding: '12px',
-                overflow: 'hidden'
-            }}
+            className={styles.body}
         >
             <div className={`${styles.messageList} custom-scroll`}>
                 <List
