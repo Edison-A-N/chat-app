@@ -109,7 +109,7 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved }) => {
                                         <>
                                             <Form.Item
                                                 label="AWS Access Key ID"
-                                                name={['aws', 'accessKeyId']}
+                                                name={['aws', 'credentials', 'accessKeyId']}
                                                 rules={[
                                                     { required: isAwsRequired(currentProvider), message: 'Please enter AWS Access Key ID' },
                                                     { min: 20, message: 'Invalid Access Key ID length' }
@@ -120,7 +120,7 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved }) => {
 
                                             <Form.Item
                                                 label="AWS Secret Access Key"
-                                                name={['aws', 'secretAccessKey']}
+                                                name={['aws', 'credentials', 'secretAccessKey']}
                                                 rules={[
                                                     { required: isAwsRequired(currentProvider), message: 'Please enter AWS Secret Access Key' },
                                                     { min: 40, message: 'Invalid Secret Access Key length' }

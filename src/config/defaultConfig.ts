@@ -1,14 +1,14 @@
-import { UserConfig } from '../config';
+import { UserConfig } from '../types/config';
 
 export const defaultConfig: UserConfig = {
     aws: {
-        region: 'us-east-1',
         credentials: {
             accessKeyId: '',
             secretAccessKey: ''
         },
+        region: 'us-east-1',
         bedrock: {
-            modelId: 'anthropic.claude-3-sonnet-20240229-v1:0',
+            modelId: 'anthropic.claude-v2',
             maxTokens: 4096,
             temperature: 0.7,
             topP: 0.9,

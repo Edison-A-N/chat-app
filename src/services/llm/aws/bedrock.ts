@@ -1,40 +1,82 @@
 import { BedrockRuntimeClient, InvokeModelCommand, InvokeModelWithResponseStreamCommand } from "@aws-sdk/client-bedrock-runtime";
 import { PromptResponse, LLMService, Message } from '../types';
-import { ConfigLoader } from '../../../config/configLoader';
+import { useConfigStore } from '../../../stores/configStore';
+
+// 在文件开头添加
+let configInitialized = false;
+
+// 添加配置订阅
+let unsubscribe: (() => void) | null = null;
 
 // Create a function to initialize the client
 async function createBedrockClient() {
-    try {
-        // Ensure the config is loaded before accessing it
-        await ConfigLoader.getInstance().loadConfig();
+    const state = useConfigStore.getState();
+    console.log('Creating Bedrock client with config:', state.config);  // 调试日志
 
-        const config = ConfigLoader.getInstance().getConfig();
-        const awsConfig = config.aws;
-
-        console.log('Creating Bedrock client with region:', awsConfig.region);
-        console.log('Access key ID:', awsConfig.credentials.accessKeyId);
-        console.log('Secret access key:', awsConfig.credentials.secretAccessKey);
-
-        return new BedrockRuntimeClient({
-            region: awsConfig.region,
-            credentials: {
-                accessKeyId: awsConfig.credentials.accessKeyId,
-                secretAccessKey: awsConfig.credentials.secretAccessKey
-            }
-        });
-    } catch (error) {
-        console.error('Failed to initialize Bedrock client:', error);
-        throw error;
+    // 注意这里的路径应该是 config.aws.credentials
+    const awsConfig = state.config.aws;
+    if (!awsConfig?.credentials?.accessKeyId || !awsConfig?.credentials?.secretAccessKey) {
+        throw new Error('AWS credentials not found in config. Please check your configuration.');
     }
+
+    return new BedrockRuntimeClient({
+        region: awsConfig.region,
+        credentials: {
+            accessKeyId: awsConfig.credentials.accessKeyId,
+            secretAccessKey: awsConfig.credentials.secretAccessKey
+        }
+    });
 }
 
 // Initialize the client
-let client: BedrockRuntimeClient;
+let client: BedrockRuntimeClient | null = null;
 
 // Function to ensure client is initialized
 async function getClient() {
+    if (!configInitialized) {
+        const state = useConfigStore.getState();
+        console.log('Initial state:', state);  // 调试日志
+
+        // 如果配置正在加载，等待加载完成
+        if (state.loading) {
+            console.log('Waiting for config to load...');
+            await new Promise<void>((resolve) => {
+                const unsubscribe = useConfigStore.subscribe((state) => {
+                    if (!state.loading) {
+                        unsubscribe();
+                        resolve();
+                    }
+                });
+            });
+        }
+        configInitialized = true;
+    }
+
     if (!client) {
-        client = await createBedrockClient();
+        try {
+            client = await createBedrockClient();
+
+            // 更新配置订阅逻辑
+            if (!unsubscribe) {
+                unsubscribe = useConfigStore.subscribe((state, prevState) => {
+                    // 检查 AWS 配置的具体字段变化
+                    const prevAws = prevState.config.aws;
+                    const currentAws = state.config.aws;
+
+                    if (
+                        prevAws?.credentials?.accessKeyId !== currentAws?.credentials?.accessKeyId ||
+                        prevAws?.credentials?.secretAccessKey !== currentAws?.credentials?.secretAccessKey ||
+                        prevAws?.region !== currentAws?.region
+                    ) {
+                        console.log('AWS config changed, will recreate client');
+                        client = null;
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Failed to create Bedrock client:', error);
+            throw error;
+        }
     }
     return client;
 }
@@ -42,7 +84,7 @@ async function getClient() {
 export const getResponseFromBedrock = async (messages: Message[]): Promise<PromptResponse> => {
     try {
         const bedrockClient = await getClient();
-        const config = ConfigLoader.getInstance().getConfig();
+        const config = useConfigStore.getState().config;
         const bedrockConfig = config.aws.bedrock;
 
         const payload = {
@@ -86,8 +128,9 @@ export const getStreamingResponseFromBedrock = async (
     try {
         streamController = new AbortController();
         const bedrockClient = await getClient();
-        const config = ConfigLoader.getInstance().getConfig();
+        const config = useConfigStore.getState().config;
         const bedrockConfig = config.aws.bedrock;
+        console.log('aws', config.aws);
 
         const payload = {
             max_tokens: bedrockConfig.maxTokens,
@@ -160,6 +203,16 @@ export class BedrockService implements LLMService {
             BedrockService.instance = new BedrockService();
         }
         return BedrockService.instance;
+    }
+
+    // 添加清理方法
+    public static cleanup() {
+        if (unsubscribe) {
+            unsubscribe();
+            unsubscribe = null;
+        }
+        client = null;
+        configInitialized = false;  // 重置初始化标志
     }
 
     public async chat(messages: Message[]): Promise<string> {

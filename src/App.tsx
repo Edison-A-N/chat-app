@@ -1,33 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { Spin } from 'antd';
+import React, { useEffect } from 'react';
 import MainLayout from './components/Layout/MainLayout';
-import { ConfigLoader } from './config/configLoader';
-import styles from './App.module.css';
+import useConfigStore from './stores/configStore';
 
 const App: React.FC = () => {
-    const [loading, setLoading] = useState(true);
+    const loadConfig = useConfigStore(state => state.loadConfig);
 
     useEffect(() => {
+
         const initConfig = async () => {
-            try {
-                await ConfigLoader.getInstance().loadConfig();
-            } catch (error) {
-                console.error('Failed to initialize config:', error);
-            } finally {
-                setLoading(false);
-            }
+            await loadConfig();
         };
 
         initConfig();
-    }, []);
+    }, [loadConfig]);
 
-    if (loading) {
-        return (
-            <div className={styles.loadingContainer}>
-                <Spin size="large" tip="正在加载配置..." />
-            </div>
-        );
-    }
 
     return <MainLayout />;
 };

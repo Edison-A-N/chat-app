@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Message, LLMService } from '../types';
-import { ConfigLoader } from '../../../config/configLoader';
+import { useConfigStore } from '../../../stores/configStore';
 
 let streamController: AbortController | null = null;
 
@@ -10,7 +10,8 @@ export class GeminiService implements LLMService {
     private model: any;
 
     private constructor() {
-        const config = ConfigLoader.getInstance().getConfig();
+        const configStore = useConfigStore.getState();
+        const config = configStore.config;
         this.genAI = new GoogleGenerativeAI(config.google.apiKey);
         this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
     }
