@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Card, message, Spin, Collapse, Select } from 'antd';
 import { UserConfig } from '../types/config';
-import { ConfigLoader } from '../config/configLoader';
+import { useConfigStore } from '../stores/configStore';
 import styles from './ConfigEditor.module.css';
 
 interface ConfigEditorProps {
@@ -11,85 +11,55 @@ interface ConfigEditorProps {
 
 const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved }) => {
     const [form] = Form.useForm();
-    const [loading, setLoading] = useState(false);
-    const [currentProvider, setCurrentProvider] = useState<string>();
-    const configLoader = ConfigLoader.getInstance();
+    const { loading, loadConfig, saveConfig, config } = useConfigStore();
+    const [currentProvider, setCurrentProvider] = useState<string>(config.llm.provider);
+    const [manualExpandedKeys, setManualExpandedKeys] = useState<string[]>([]);
 
     useEffect(() => {
-        loadConfig();
-    }, []);
-
-    const loadConfig = async () => {
-        setLoading(true);
-        try {
-            const currentConfig = configLoader.getConfig();
-            form.setFieldsValue({
-                aws: {
-                    accessKeyId: currentConfig.aws.credentials.accessKeyId,
-                    secretAccessKey: currentConfig.aws.credentials.secretAccessKey,
-                    region: currentConfig.aws.region,
-                    bedrock: {
-                        modelId: currentConfig.aws.bedrock.modelId,
-                        maxTokens: currentConfig.aws.bedrock.maxTokens,
-                        temperature: currentConfig.aws.bedrock.temperature,
-                        topP: currentConfig.aws.bedrock.topP,
-                        anthropicVersion: currentConfig.aws.bedrock.anthropicVersion
-                    }
-                },
-                google: {
-                    apiKey: currentConfig.google.apiKey
-                },
-                llm: {
-                    provider: currentConfig.llm.provider
-                },
-                chat: {
-                    maxHistoryLength: currentConfig.chat.maxHistoryLength
+        const initializeForm = async () => {
+            try {
+                await loadConfig();
+                const currentConfig = useConfigStore.getState().config;
+                form.setFieldsValue(currentConfig);
+                setCurrentProvider(currentConfig.llm.provider);
+                const initialKeys = ['chat'];
+                if (currentConfig.llm.provider.startsWith('bedrock')) {
+                    initialKeys.push('aws');
+                } else if (currentConfig.llm.provider === 'gemini') {
+                    initialKeys.push('google');
                 }
-            });
-        } catch (error) {
-            message.error('Failed to load configuration');
-            console.error('Failed to load config:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+                setManualExpandedKeys(initialKeys);
+            } catch (error) {
+                message.error('Failed to load configuration');
+            }
+        };
+
+        initializeForm();
+    }, [form]);
 
     const handleSubmit = async (values: UserConfig) => {
-        setLoading(true);
         try {
-            await configLoader.saveConfig(values);
+            await saveConfig(values);
             message.success('Configuration saved successfully');
             onSaved?.();
         } catch (error) {
             message.error('Failed to save configuration');
-            console.error('Failed to save config:', error);
-        } finally {
-            setLoading(false);
         }
     };
 
     const handleProviderChange = (value: string) => {
         setCurrentProvider(value);
+        const newKeys = ['chat'];
         if (value.startsWith('bedrock')) {
-            form.setFieldsValue({
-                google: { apiKey: undefined }
-            });
+            newKeys.push('aws');
         } else if (value === 'gemini') {
-            form.setFieldsValue({
-                aws: {
-                    accessKeyId: undefined,
-                    secretAccessKey: undefined,
-                    region: undefined,
-                    bedrock: {
-                        modelId: undefined,
-                        maxTokens: undefined,
-                        temperature: undefined,
-                        topP: undefined,
-                        anthropicVersion: undefined
-                    }
-                }
-            });
+            newKeys.push('google');
         }
+        setManualExpandedKeys(newKeys);
+    };
+
+    const handleCollapseChange = (keys: string[]) => {
+        setManualExpandedKeys(keys);
     };
 
     const isAwsRequired = (provider?: string) => {
@@ -98,6 +68,10 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved }) => {
 
     const isGoogleRequired = (provider?: string) => {
         return provider === 'gemini';
+    };
+
+    const getActiveKeys = () => {
+        return manualExpandedKeys;
     };
 
     return (
@@ -109,6 +83,7 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved }) => {
                         layout="vertical"
                         onFinish={handleSubmit}
                         disabled={loading}
+                        initialValues={config}
                     >
                         <Form.Item
                             label="LLM Provider"
@@ -122,11 +97,14 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved }) => {
                         </Form.Item>
 
                         <Collapse
-                            defaultActiveKey={['aws', 'google', 'chat']}
+                            activeKey={getActiveKeys()}
+                            onChange={handleCollapseChange}
+                            destroyInactivePanel={false}
                             items={[
                                 {
                                     key: 'aws',
                                     label: 'AWS Configuration',
+                                    forceRender: true,
                                     children: (
                                         <>
                                             <Form.Item
@@ -233,6 +211,7 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved }) => {
                                 {
                                     key: 'google',
                                     label: 'Google Configuration',
+                                    forceRender: true,
                                     children: (
                                         <Form.Item
                                             label="Google API Key"
@@ -249,6 +228,7 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved }) => {
                                 {
                                     key: 'chat',
                                     label: 'Chat Configuration',
+                                    forceRender: true,
                                     children: (
                                         <Form.Item
                                             label="Max History Length"
@@ -267,6 +247,12 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved }) => {
                     </Form>
                 </Spin>
                 <div className={styles.footer}>
+                    <Button
+                        onClick={() => form.resetFields()}
+                        style={{ marginRight: 8 }}
+                    >
+                        Reset
+                    </Button>
                     <Button
                         type="primary"
                         onClick={() => form.submit()}

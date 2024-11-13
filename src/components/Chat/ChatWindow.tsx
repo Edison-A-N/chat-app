@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card, Input, Button, List, Avatar, message } from 'antd';
 import { SendOutlined, UserOutlined, RobotOutlined, StopOutlined } from '@ant-design/icons';
 import { LLMServiceFactoryImpl } from '../../services/llm/factory';
-import { ConfigLoader } from '../../config/configLoader';
+import { useConfigStore } from '../../stores/configStore';
 import styles from './ChatWindow.module.css';
 import ReactMarkdown from 'react-markdown';
 import '../../styles/markdown.css';
@@ -26,7 +26,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
     const [currentStreamingContent, setCurrentStreamingContent] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
 
-    const config = ConfigLoader.getInstance().getConfig();
+    const config = useConfigStore.getState().config;
     const llmService = LLMServiceFactoryImpl.getInstance().createService(config.llm.provider);
 
     const scrollToBottom = () => {
