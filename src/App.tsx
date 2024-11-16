@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import MainLayout from './components/Layout/MainLayout';
 import useConfigStore from './stores/configStore';
-import { conversationService } from './services/conversation';
+import { useConversationStore } from './stores/conversationStore';
 
 const App: React.FC = () => {
     const loadConfig = useConfigStore(state => state.loadConfig);
+    const initConversations = useConversationStore(state => state.init);
 
     useEffect(() => {
-
         const initConfig = async () => {
             await loadConfig();
         };
@@ -16,8 +16,8 @@ const App: React.FC = () => {
     }, [loadConfig]);
 
     useEffect(() => {
-        conversationService.init();
-    }, []);
+        initConversations();
+    }, [initConversations]);
 
     return <MainLayout />;
 };

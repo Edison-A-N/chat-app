@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Layout, Button } from 'antd';
 import {
     MenuFoldOutlined,
@@ -7,7 +7,7 @@ import {
     PlusOutlined
 } from '@ant-design/icons';
 import styles from './Sidebar.module.css';
-import { conversationService, type Conversation } from '../services/conversation';
+import { useConversationStore } from '../stores/conversationStore';
 
 const { Sider } = Layout;
 
@@ -19,25 +19,11 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse, onNewChat, onSettingsClick }) => {
-    const [conversations, setConversations] = useState<Conversation[]>([]);
-    const [loading, setLoading] = useState(false);
+    const { conversations, loading, init } = useConversationStore();
 
     useEffect(() => {
-        const loadConversations = async () => {
-            setLoading(true);
-            try {
-                const data = await conversationService.listConversations();
-                console.log('data', data);
-                setConversations(data);
-            } catch (error) {
-                console.error('Failed to load conversations:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadConversations();
-    }, []);
+        init();
+    }, [init]);
 
     const recentConversations = conversations.slice(0, 5);
 

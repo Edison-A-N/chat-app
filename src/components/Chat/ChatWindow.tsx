@@ -3,7 +3,7 @@ import { Card, Input, Button, List, Avatar, message } from 'antd';
 import { SendOutlined, UserOutlined, RobotOutlined, StopOutlined, ExpandAltOutlined, ShrinkOutlined } from '@ant-design/icons';
 import { LLMServiceFactoryImpl } from '../../services/llm/factory';
 import { useConfigStore } from '../../stores/configStore';
-import { useChatStore } from '../../stores/chatStore';
+import { useConversationStore } from '../../stores/conversationStore';
 import styles from './ChatWindow.module.css';
 import ReactMarkdown from 'react-markdown';
 import '../../styles/markdown.css';
@@ -37,7 +37,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
         [provider]
     );
 
-    const { currentChat, createNewChat, updateCurrentChat } = useChatStore();
+    const { currentChat, createNewChat, updateCurrentChat, setCurrentChat } = useConversationStore();
 
     useEffect(() => {
         if (currentProviderRef.current && currentProviderRef.current !== provider) {
@@ -96,7 +96,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
         try {
             const messageHistory = newMessages.map(msg => ({
                 role: msg.role,
-                content: msg.content
+                content: msg.content,
+                timestamp: msg.timestamp
             }));
 
             let isFirstChunk = true;
@@ -116,7 +117,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
 
                         if (isNewChat) {
                             const subject = userMessage.content.slice(0, 10) + (userMessage.content.length > 10 ? '...' : '');
-                            createNewChat(subject, []);
+                            createNewChat(subject, messageHistory);
                         }
                     }
                     setCurrentStreamingContent(chunk);
@@ -129,7 +130,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                                 return msg;
                             });
 
-                            updateCurrentChat(updatedMessages);
+                            const messageHistory = updatedMessages.map(msg => ({
+                                role: msg.role,
+                                content: msg.content,
+                                timestamp: msg.timestamp
+                            }));
+                            updateCurrentChat(messageHistory);
 
                             return updatedMessages;
                         });
@@ -186,7 +192,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
         setCurrentStreamingContent('');
         setIsGenerating(false);
         setLoading(false);
-        useChatStore.getState().setCurrentChat(null);
+        setCurrentChat(null);
         if (onNewChat) {
             onNewChat();
         }
