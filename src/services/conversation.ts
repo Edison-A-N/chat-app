@@ -35,17 +35,39 @@ export interface Conversation {
 
 export class ConversationService {
     private conversationDir: string | null = null;
+    private conversations: Conversation[] = [];
+    private initialized = false;
 
     async init() {
+        if (this.initialized) return;
+
         const appData = await appDataDir();
         this.conversationDir = await join(appData, 'conversations');
 
         try {
             await mkdir(this.conversationDir, { recursive: true });
+            await this.loadAllConversations();
+            this.initialized = true;
         } catch (error) {
-            // Directory might already exist
-            console.log('Conversation directory already exists');
+            console.error('Failed to initialize conversation service:', error);
+            throw error;
         }
+    }
+
+    private async loadAllConversations() {
+        if (!this.conversationDir) return;
+
+        const files = await readDir(this.conversationDir);
+        const conversations: Conversation[] = [];
+
+        for (const file of files) {
+            if (file.name?.endsWith('.json')) {
+                const content = await readTextFile(await join(this.conversationDir, file.name));
+                conversations.push(JSON.parse(content));
+            }
+        }
+
+        this.conversations = conversations.sort((a, b) => b.timestamp - a.timestamp);
     }
 
     async saveConversation(subject: string, messages: Message[], options: {
@@ -69,10 +91,15 @@ export class ConversationService {
 
         const filePath = await join(this.conversationDir, `${conversation.id}.json`);
         await writeTextFile(filePath, JSON.stringify(conversation, null, 2));
+
+        this.conversations.unshift(conversation);
         return conversation;
     }
 
     async loadConversation(id: string): Promise<Conversation> {
+        const conversation = this.conversations.find(c => c.id === id);
+        if (conversation) return conversation;
+
         if (!this.conversationDir) {
             throw new Error('Conversation service not initialized');
         }
@@ -83,21 +110,10 @@ export class ConversationService {
     }
 
     async listConversations(): Promise<Conversation[]> {
-        if (!this.conversationDir) {
-            throw new Error('Conversation service not initialized');
+        if (!this.initialized) {
+            await this.init();
         }
-
-        const files = await readDir(this.conversationDir);
-        const conversations: Conversation[] = [];
-
-        for (const file of files) {
-            if (file.name?.endsWith('.json')) {
-                const content = await readTextFile(await join(this.conversationDir, file.name));
-                conversations.push(JSON.parse(content));
-            }
-        }
-
-        return conversations.sort((a, b) => b.timestamp - a.timestamp);
+        return this.conversations;
     }
 
     async updateConversation(conversation: Conversation) {
@@ -107,6 +123,13 @@ export class ConversationService {
 
         const filePath = await join(this.conversationDir, `${conversation.id}.json`);
         await writeTextFile(filePath, JSON.stringify(conversation, null, 2));
+
+        const index = this.conversations.findIndex(c => c.id === conversation.id);
+        if (index !== -1) {
+            this.conversations[index] = conversation;
+            this.conversations.sort((a, b) => b.timestamp - a.timestamp);
+        }
+
         return conversation;
     }
 }

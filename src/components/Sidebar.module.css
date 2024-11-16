@@ -70,3 +70,58 @@
   color: #1890ff;
   background: #e6f7ff;
 }
+
+.conversationList {
+    margin-top: 8px;
+    width: 100%;
+}
+
+.conversationItem {
+    text-align: left !important;
+    padding: 8px 24px !important;
+    height: auto !important;
+    display: flex !important;
+    align-items: center;
+    width: 100%;
+    position: relative;
+}
+
+.collapsedItem {
+    padding: 8px 12px !important;
+}
+
+.conversationSubject {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    text-align: left;
+    color: rgba(0, 0, 0, 0.85);
+    font-size: 14px;
+}
+
+.collapsedItem .conversationSubject {
+    font-size: 12px;
+}
+
+.conversationItem:hover .conversationSubject {
+    white-space: normal;
+    word-break: break-word;
+}
+
+.conversationItem:hover::after {
+    content: attr(title);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: normal;
+    max-width: 200px;
+    z-index: 1000;
+    margin-left: 8px;
+}

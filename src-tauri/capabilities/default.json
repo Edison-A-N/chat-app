@@ -32,6 +32,15 @@
         }
       ]
     },
+    "fs:allow-read-dir",
+    {
+      "identifier": "fs:allow-read-dir",
+      "allow": [
+        {
+          "path": "$APPDATA/**"
+        }
+      ]
+    },
     "core:path:default",
     "core:path:allow-join",
     {

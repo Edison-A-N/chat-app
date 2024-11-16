@@ -5,7 +5,7 @@ import Sidebar from '../Sidebar';
 import ConfigEditor from '../ConfigEditor';
 import styles from './MainLayout.module.css';
 
-const { Sider, Content } = Layout;
+const { Content } = Layout;
 
 const MainLayout: React.FC = () => {
     const [showConfig, setShowConfig] = useState(false);
@@ -22,14 +22,12 @@ const MainLayout: React.FC = () => {
 
     return (
         <Layout className={styles.layout}>
-            <Sider width={250} theme="light" collapsed={collapsed}>
-                <Sidebar
-                    onNewChat={handleNewChat}
-                    collapsed={collapsed}
-                    onCollapse={setCollapsed}
-                    onSettingsClick={handleSettingsClick}
-                />
-            </Sider>
+            <Sidebar
+                onNewChat={handleNewChat}
+                collapsed={collapsed}
+                onCollapse={setCollapsed}
+                onSettingsClick={handleSettingsClick}
+            />
             <Content className={styles.contentWrapper}>
                 <div className={`${styles.chatContainer} ${showConfig ? styles.withConfig : ''}`}>
                     <ChatWindow
