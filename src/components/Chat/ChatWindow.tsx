@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Card, Input, Button, List, Avatar, message } from 'antd';
-import { SendOutlined, UserOutlined, RobotOutlined, StopOutlined } from '@ant-design/icons';
+import { SendOutlined, UserOutlined, RobotOutlined, StopOutlined, ExpandAltOutlined, ShrinkOutlined } from '@ant-design/icons';
 import { LLMServiceFactoryImpl } from '../../services/llm/factory';
 import { useConfigStore } from '../../stores/configStore';
 import styles from './ChatWindow.module.css';
@@ -11,6 +11,7 @@ interface ChatMessage {
     role: 'user' | 'assistant';
     content: string;
     timestamp: number;
+    error?: boolean;
 }
 
 interface ChatWindowProps {
@@ -26,6 +27,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
     const [currentStreamingContent, setCurrentStreamingContent] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const currentProviderRef = useRef<string>();
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [inputReady, setInputReady] = useState(false);
 
     const provider = useConfigStore((state) => state.config.llm.provider);
     const llmService = useMemo(() =>
@@ -50,6 +53,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
 
     useEffect(() => {
         const timer = setTimeout(() => {
+            setInputReady(true);
             inputRef.current?.focus();
         }, 100);
 
@@ -90,6 +94,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                 role: 'assistant',
                 content: '',
                 timestamp: Date.now(),
+                error: false
             };
             setMessages(prev => [...prev, assistantMessage]);
 
@@ -123,7 +128,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                 className: styles.errorMessage,
                 onClick: () => message.destroy()
             });
-            setMessages(prev => prev.slice(0, -1));
+            setMessages(prev => prev.map((msg, index) => {
+                if (index === prev.length - 1) {
+                    return { ...msg, content: (error as Error).message, error: true };
+                }
+                return msg;
+            }));
             focusInput();
         } finally {
             setLoading(false);
@@ -184,59 +194,88 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
             }}
             className={styles.body}
         >
-            <div className={`${styles.messageList} custom-scroll`}>
-                <List
-                    itemLayout="horizontal"
-                    dataSource={messages}
-                    renderItem={(item, index) => (
-                        <List.Item className={item.role === 'user' ? styles.userMessage : styles.assistantMessage}>
-                            <List.Item.Meta
-                                avatar={
-                                    <Avatar icon={item.role === 'user' ? <UserOutlined /> : <RobotOutlined />} />
-                                }
-                                description={
-                                    <div className={styles.messageContent}>
-                                        {item.role === 'user' ? (
-                                            (index === messages.length - 1
-                                                ? currentStreamingContent || item.content
-                                                : item.content)
-                                        ) : (
-                                            <ReactMarkdown className="markdown-content">
-                                                {index === messages.length - 1
-                                                    ? currentStreamingContent || item.content
-                                                    : item.content}
-                                            </ReactMarkdown>
-                                        )}
-                                    </div>
-                                }
-                            />
-                        </List.Item>
-                    )}
-                />
-                <div ref={messagesEndRef} />
-            </div>
+            <div className={styles.chatContainer}>
+                <div className={`${styles.messageList} custom-scroll`}>
+                    <List
+                        itemLayout="horizontal"
+                        dataSource={messages}
+                        renderItem={(item, index) => (
+                            <List.Item
+                                className={`
+                                    ${item.role === 'user' ? styles.userMessage : styles.assistantMessage}
+                                    ${item.error ? styles.errorMessage : ''}
+                                `}
+                            >
+                                <List.Item.Meta
+                                    avatar={
+                                        <Avatar icon={item.role === 'user' ? <UserOutlined /> : <RobotOutlined />} />
+                                    }
+                                    description={
+                                        <div>
+                                            <div className={styles.messageContent}>
+                                                {item.role === 'user' ? (
+                                                    (index === messages.length - 1
+                                                        ? currentStreamingContent || item.content
+                                                        : item.content)
+                                                ) : (
+                                                    <ReactMarkdown className="markdown-content">
+                                                        {index === messages.length - 1
+                                                            ? currentStreamingContent || item.content
+                                                            : item.content}
+                                                    </ReactMarkdown>
+                                                )}
+                                            </div>
+                                            <div className={styles.messageTimestamp}>
+                                                {new Date(item.timestamp).toLocaleTimeString()}
+                                            </div>
+                                        </div>
+                                    }
+                                />
+                            </List.Item>
+                        )}
+                    />
+                    <div ref={messagesEndRef} />
+                </div>
 
-            <div className={styles.inputArea}>
-                <Input.TextArea
-                    ref={inputRef}
-                    value={inputValue}
-                    onChange={e => setInputValue(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Enter message..."
-                    autoSize={{ minRows: 2, maxRows: 6 }}
-                    disabled={loading}
-                    className={styles.textarea}
-                    autoFocus
-                />
-                <Button
-                    type="primary"
-                    icon={isGenerating ? <StopOutlined /> : <SendOutlined />}
-                    onClick={isGenerating ? handleStop : handleSend}
-                    loading={loading && !isGenerating}
-                    disabled={!isGenerating && !inputValue.trim()}
-                >
-                    {isGenerating ? 'Stop' : 'Send'}
-                </Button>
+                <div className={`${styles.inputContainer} ${isExpanded ? styles.expanded : ''}`}>
+                    {isExpanded && (
+                        <Button
+                            className={styles.shrinkButton}
+                            icon={<ShrinkOutlined />}
+                            onClick={() => setIsExpanded(false)}
+                        />
+                    )}
+                    <div className={styles.inputWrapper}>
+                        <Input.TextArea
+                            ref={inputRef}
+                            value={inputValue}
+                            onChange={e => setInputValue(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            placeholder="Enter message..."
+                            autoSize={inputReady ? (isExpanded ? { minRows: 8, maxRows: 12 } : { minRows: 1, maxRows: 4 }) : false}
+                            disabled={loading}
+                            className={styles.textarea}
+                            style={{ height: !inputReady ? '32px' : undefined }}
+                            autoFocus
+                        />
+                        <div className={styles.buttonGroup}>
+                            {!isExpanded && (
+                                <Button
+                                    className={styles.expandButton}
+                                    icon={<ExpandAltOutlined />}
+                                    onClick={() => setIsExpanded(true)}
+                                />
+                            )}
+                            <Button
+                                className={styles.sendButton}
+                                icon={isGenerating ? <StopOutlined /> : <SendOutlined />}
+                                onClick={isGenerating ? handleStop : handleSend}
+                                loading={loading && !isGenerating}
+                                disabled={!isGenerating && !inputValue.trim()}
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
         </Card>
     );

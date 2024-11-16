@@ -1,9 +1,95 @@
+.chatContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    min-height: 400px;
+}
+
 .messageList {
     flex: 1;
     overflow-y: auto;
-    padding-right: 8px;
-    margin-bottom: 12px;
-    max-height: calc(100vh - 200px);
+    padding: 0 16px;
+    margin-bottom: 8px;
+}
+
+.inputContainer {
+    position: relative;
+    background: #fff;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-top: 1px solid #e8e8e8;
+    padding: 12px;
+    min-height: 76px;
+    height: 76px;
+}
+
+.inputContainer.expanded {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    height: 300px;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.inputWrapper {
+    position: relative;
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 8px 80px 8px 12px;
+    height: 100%;
+    min-height: 52px;
+    display: flex;
+    flex-direction: column;
+}
+
+.textarea {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    resize: none;
+    flex: 1;
+    transition: all 0.2s ease-in-out !important;
+    min-height: 32px !important;
+}
+
+.buttonGroup {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.sendButton,
+.expandButton {
+    background: transparent !important;
+    border: none !important;
+    padding: 6px !important;
+    height: 32px;
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.shrinkButton {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    background: transparent !important;
+    border: none !important;
+}
+
+.messageList.shrinkList {
+    flex: 0 1 200px;
 }
 
 /* 自定义滚动条样式 */
@@ -33,24 +119,6 @@
     overflow-wrap: break-word;
 }
 
-.inputArea {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-    margin-top: auto;
-    background: #fff;
-    padding-top: 8px;
-    border-top: 1px solid #f0f0f0;
-}
-
-.textarea {
-    flex: 1;
-    resize: none;
-    border-radius: 4px;
-    padding: 8px 12px;
-    min-height: 40px;
-}
-
 .userMessage {
     justify-content: flex-end;
     background-color: #f5f5f5;
@@ -69,12 +137,9 @@
 
 /* 添加新的样式来处理 Card 的内部结构 */
 .body :global(.ant-card-body) {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 12px;
-    overflow: hidden;
+    padding: 0;
     height: 100%;
+    overflow: hidden;
 }
 
 .errorMessage {
@@ -83,4 +148,24 @@
 
 .errorMessage:hover {
     opacity: 0.8;
+}
+
+/* 确保展开时的样式正确 */
+.inputContainer.expanded .inputWrapper {
+    height: 100%;
+}
+
+.inputContainer.expanded .textarea {
+    height: 100% !important;
+}
+
+.messageTimestamp {
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+}
+
+.errorMessage {
+    background-color: #fff2f0;
+    border: 1px solid #ffccc7;
 }
