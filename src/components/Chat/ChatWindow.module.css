@@ -76,3 +76,11 @@
     overflow: hidden;
     height: 100%;
 }
+
+.errorMessage {
+    cursor: pointer;
+}
+
+.errorMessage:hover {
+    opacity: 0.8;
+}

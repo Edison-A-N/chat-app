@@ -62,6 +62,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
         }, 100);
     };
 
+    useEffect(() => {
+        message.config({
+            duration: 10,
+            maxCount: 1,
+            top: 24,
+        });
+    }, []);
+
     const handleSend = async () => {
         if (!inputValue.trim()) return;
 
@@ -109,7 +117,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
             );
         } catch (error) {
             console.error('Chat error:', error);
-            message.error('发送消息失败，请检查配置或网络连接');
+            const errorMessage = (error as Error).message || 'Failed to send message. Please check your configuration or network connection';
+            message.error({
+                content: errorMessage,
+                className: styles.errorMessage,
+                onClick: () => message.destroy()
+            });
+            setMessages(prev => prev.slice(0, -1));
             focusInput();
         } finally {
             setLoading(false);
@@ -208,7 +222,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                     value={inputValue}
                     onChange={e => setInputValue(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="输入消息..."
+                    placeholder="Enter message..."
                     autoSize={{ minRows: 2, maxRows: 6 }}
                     disabled={loading}
                     className={styles.textarea}
@@ -221,7 +235,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                     loading={loading && !isGenerating}
                     disabled={!isGenerating && !inputValue.trim()}
                 >
-                    {isGenerating ? '停止' : '发送'}
+                    {isGenerating ? 'Stop' : 'Send'}
                 </Button>
             </div>
         </Card>

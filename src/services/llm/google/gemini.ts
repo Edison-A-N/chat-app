@@ -38,7 +38,7 @@ export class GeminiService implements LLMService {
             return response.text();
         } catch (error) {
             console.error('Chat error:', error);
-            throw error;
+            throw new Error((error as any)?.message || 'Unknown error');
         }
     }
 
@@ -71,7 +71,7 @@ export class GeminiService implements LLMService {
                 return;
             }
             console.error('Stream chat error:', error);
-            throw error;
+            throw new Error((error as any)?.message || 'Unknown error');
         } finally {
             streamController = null;
         }
