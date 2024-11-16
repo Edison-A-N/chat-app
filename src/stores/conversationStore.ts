@@ -1,8 +1,7 @@
 import { create } from 'zustand';
-import { Message, Conversation } from '../services/conversation';
 import { mkdir, writeTextFile, readTextFile, readDir } from '@tauri-apps/plugin-fs';
 import { appDataDir, join } from '@tauri-apps/api/path';
-
+import { Message, Conversation } from '../types/conversation';
 interface ConversationStore {
     conversations: Conversation[];
     loading: boolean;

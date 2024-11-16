@@ -84,6 +84,9 @@
     align-items: center;
     width: 100%;
     position: relative;
+    transition: all 0.2s ease-in-out !important;
+    border-radius: 0 !important;
+    margin: 2px 0 !important;
 }
 
 .collapsedItem {
@@ -124,4 +127,18 @@
     max-width: 200px;
     z-index: 1000;
     margin-left: 8px;
+}
+
+.activeItem {
+    font-weight: 500 !important;
+    background-color: #e6f4ff !important;
+    border-right: 3px solid #1890ff !important;
+}
+
+.activeItem:hover {
+    background-color: #e6f4ff !important;
+}
+
+.activeItem:active {
+    transform: scale(0.99);
 }

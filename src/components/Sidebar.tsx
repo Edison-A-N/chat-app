@@ -8,6 +8,7 @@ import {
 } from '@ant-design/icons';
 import styles from './Sidebar.module.css';
 import { useConversationStore } from '../stores/conversationStore';
+import { Conversation } from '../types/conversation';
 
 const { Sider } = Layout;
 
@@ -19,7 +20,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse, onNewChat, onSettingsClick }) => {
-    const { conversations, loading, init } = useConversationStore();
+    const { conversations, loading, init, setCurrentChat, currentChat } = useConversationStore();
 
     useEffect(() => {
         init();
@@ -29,6 +30,10 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse, onNewChat, onS
 
     const getShortSubject = (subject: string) => {
         return collapsed ? subject.slice(0, 4) + '...' : subject;
+    };
+
+    const handleConversationClick = (conversation: Conversation) => {
+        setCurrentChat(conversation);
     };
 
     return (
@@ -66,8 +71,13 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse, onNewChat, onS
                             key={conv.id}
                             type="text"
                             block
-                            className={`${styles.conversationItem} ${collapsed ? styles.collapsedItem : ''}`}
+                            className={`
+                                ${styles.conversationItem}
+                                ${collapsed ? styles.collapsedItem : ''}
+                                ${currentChat?.id === conv.id ? styles.activeItem : ''}
+                            `}
                             title={conv.subject}
+                            onClick={() => handleConversationClick(conv)}
                         >
                             <span className={styles.conversationSubject}>
                                 {getShortSubject(conv.subject)}

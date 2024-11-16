@@ -5,6 +5,11 @@ export interface ChatMessage {
     error?: boolean;
 }
 
+export interface LLMMessage {
+    role: 'user' | 'assistant';
+    content: string;
+}
+
 export interface Conversation {
     id: string;
     subject: string;

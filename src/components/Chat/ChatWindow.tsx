@@ -46,6 +46,17 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
         currentProviderRef.current = provider;
     }, [provider]);
 
+    useEffect(() => {
+        if (currentChat) {
+            setMessages(
+                currentChat.content.messages.map(msg => ({
+                    ...msg,
+                    timestamp: msg.timestamp || Date.now(),
+                }))
+            );
+        }
+    }, [currentChat]);
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
@@ -97,7 +108,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
             const messageHistory = newMessages.map(msg => ({
                 role: msg.role,
                 content: msg.content,
-                timestamp: msg.timestamp
+                timestamp: msg.timestamp,
             }));
 
             let isFirstChunk = true;
@@ -107,36 +118,48 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                 messageHistory,
                 (chunk: string, isComplete: boolean) => {
                     if (isFirstChunk) {
-                        setMessages(prev => [...prev, {
+                        const assistantMessage: ChatMessage = {
                             role: 'assistant',
                             content: '',
                             timestamp: Date.now(),
                             error: false
-                        }]);
+                        };
+                        setMessages(prev => [...prev, assistantMessage]);
                         isFirstChunk = false;
 
                         if (isNewChat) {
-                            const subject = userMessage.content.slice(0, 10) + (userMessage.content.length > 10 ? '...' : '');
-                            createNewChat(subject, messageHistory);
+                            const subject = userMessage.content.slice(0, 30) + (userMessage.content.length > 30 ? '...' : '');
+                            const initialAssistantMessage = {
+                                role: 'assistant' as const,
+                                content: chunk,
+                                timestamp: Date.now()
+                            };
+                            createNewChat(subject, [...messageHistory, initialAssistantMessage]);
                         }
                     }
+
                     setCurrentStreamingContent(chunk);
+
                     if (isComplete) {
                         setMessages(prev => {
                             const updatedMessages = prev.map((msg, index) => {
                                 if (index === prev.length - 1) {
-                                    return { ...msg, content: chunk };
+                                    return {
+                                        ...msg,
+                                        content: chunk,
+                                        timestamp: Date.now()
+                                    };
                                 }
                                 return msg;
                             });
 
-                            const messageHistory = updatedMessages.map(msg => ({
+                            const completeMessageHistory = updatedMessages.map(msg => ({
                                 role: msg.role,
                                 content: msg.content,
-                                timestamp: msg.timestamp
+                                timestamp: msg.timestamp,
                             }));
-                            updateCurrentChat(messageHistory);
 
+                            updateCurrentChat(completeMessageHistory);
                             return updatedMessages;
                         });
                         setIsGenerating(false);
@@ -239,13 +262,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                                         <div>
                                             <div className={styles.messageContent}>
                                                 {item.role === 'user' ? (
-                                                    (index === messages.length - 1
-                                                        ? currentStreamingContent || item.content
-                                                        : item.content)
+                                                    item.content
                                                 ) : (
                                                     <ReactMarkdown className="markdown-content">
-                                                        {index === messages.length - 1
-                                                            ? currentStreamingContent || item.content
+                                                            {index === messages.length - 1 && isGenerating
+                                                                ? currentStreamingContent
                                                             : item.content}
                                                     </ReactMarkdown>
                                                 )}

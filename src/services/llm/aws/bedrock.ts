@@ -8,6 +8,14 @@ let configInitialized = false;
 // 添加配置订阅
 let unsubscribe: (() => void) | null = null;
 
+// 在文件开头添加消息转换函数
+function convertMessagesToBedrockFormat(messages: Message[]) {
+    return messages.map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content
+    }));
+}
+
 // Create a function to initialize the client
 async function createBedrockClient() {
     const state = useConfigStore.getState();
@@ -90,7 +98,7 @@ export const getResponseFromBedrock = async (messages: Message[]): Promise<Promp
         const payload = {
             max_tokens: bedrockConfig.maxTokens,
             anthropic_version: bedrockConfig.anthropicVersion,
-            messages: messages,
+            messages: convertMessagesToBedrockFormat(messages),
         };
 
         const command = new InvokeModelCommand({
@@ -135,7 +143,7 @@ export const getStreamingResponseFromBedrock = async (
         const payload = {
             max_tokens: bedrockConfig.maxTokens,
             anthropic_version: bedrockConfig.anthropicVersion,
-            messages: messages,
+            messages: convertMessagesToBedrockFormat(messages),
         };
 
         const command = new InvokeModelWithResponseStreamCommand({

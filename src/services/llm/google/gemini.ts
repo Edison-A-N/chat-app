@@ -25,9 +25,9 @@ export class GeminiService implements LLMService {
 
     private convertMessages(messages: Message[]) {
         return messages.map(msg => ({
-            role: msg.role === 'assistant' ? 'model' : msg.role,
+            role: msg.role === 'assistant' ? 'model' : 'user',
             parts: [{ text: msg.content }]
-        }));
+        })).filter(msg => msg.role === 'user' || msg.role === 'model');
     }
 
     public async chat(messages: Message[]): Promise<string> {
@@ -50,11 +50,15 @@ export class GeminiService implements LLMService {
     ): Promise<void> {
         try {
             streamController = new AbortController();
+            const history = messages.slice(0, -1);
+            const lastMessage = messages[messages.length - 1];
+
             const chat = this.model.startChat({
-                history: this.convertMessages(messages.slice(0, -1))
+                history: history.length > 0 ? this.convertMessages(history) : []
             });
+
             const result = await chat.sendMessage(
-                messages[messages.length - 1].content,
+                lastMessage.content,
                 { streamingResponse: true }
             );
 
