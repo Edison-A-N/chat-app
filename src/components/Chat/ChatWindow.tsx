@@ -3,6 +3,7 @@ import { Card, Input, Button, List, Avatar, message } from 'antd';
 import { SendOutlined, UserOutlined, RobotOutlined, StopOutlined, ExpandAltOutlined, ShrinkOutlined } from '@ant-design/icons';
 import { LLMServiceFactoryImpl } from '../../services/llm/factory';
 import { useConfigStore } from '../../stores/configStore';
+import { useChatStore } from '../../stores/chatStore';
 import styles from './ChatWindow.module.css';
 import ReactMarkdown from 'react-markdown';
 import '../../styles/markdown.css';
@@ -35,6 +36,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
         LLMServiceFactoryImpl.getInstance().createService(provider),
         [provider]
     );
+
+    const { currentChat, createNewChat, updateCurrentChat } = useChatStore();
 
     useEffect(() => {
         if (currentProviderRef.current && currentProviderRef.current !== provider) {
@@ -83,20 +86,22 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
             timestamp: Date.now(),
         };
 
-        setMessages(prev => [...prev, userMessage]);
+        const newMessages = [...messages, userMessage];
+        setMessages(newMessages);
         setInputValue('');
         setLoading(true);
         setIsGenerating(true);
         setCurrentStreamingContent('');
 
         try {
-            const messageHistory = messages.map(msg => ({
+            const messageHistory = newMessages.map(msg => ({
                 role: msg.role,
                 content: msg.content
             }));
-            messageHistory.push({ role: 'user', content: inputValue.trim() });
 
             let isFirstChunk = true;
+            let isNewChat = messages.length === 0;
+
             await llmService.streamChat(
                 messageHistory,
                 (chunk: string, isComplete: boolean) => {
@@ -108,15 +113,26 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                             error: false
                         }]);
                         isFirstChunk = false;
+
+                        if (isNewChat) {
+                            const subject = userMessage.content.slice(0, 10) + (userMessage.content.length > 10 ? '...' : '');
+                            createNewChat(subject, []);
+                        }
                     }
                     setCurrentStreamingContent(chunk);
                     if (isComplete) {
-                        setMessages(prev => prev.map((msg, index) => {
-                            if (index === prev.length - 1) {
-                                return { ...msg, content: chunk };
-                            }
-                            return msg;
-                        }));
+                        setMessages(prev => {
+                            const updatedMessages = prev.map((msg, index) => {
+                                if (index === prev.length - 1) {
+                                    return { ...msg, content: chunk };
+                                }
+                                return msg;
+                            });
+
+                            updateCurrentChat(updatedMessages);
+
+                            return updatedMessages;
+                        });
                         setIsGenerating(false);
                         focusInput();
                     }
@@ -170,6 +186,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
         setCurrentStreamingContent('');
         setIsGenerating(false);
         setLoading(false);
+        useChatStore.getState().setCurrentChat(null);
         if (onNewChat) {
             onNewChat();
         }

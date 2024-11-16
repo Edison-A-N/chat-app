@@ -5,12 +5,21 @@
   "windows": ["main"],
   "permissions": [
     "fs:default",
+    "fs:allow-mkdir",
+    {
+      "identifier": "fs:allow-mkdir",
+      "allow": [
+        {
+          "path": "$APPDATA/**"
+        }
+      ]
+    },
     "fs:allow-write-text-file",
     {
       "identifier": "fs:allow-write-text-file",
       "allow": [
         {
-          "path": "$APPDATA/*"
+          "path": "$APPDATA/**"
         }
       ]
     },
@@ -19,7 +28,7 @@
       "identifier": "fs:allow-read-text-file",
       "allow": [
         {
-          "path": "$APPDATA/*"
+          "path": "$APPDATA/**"
         }
       ]
     },
@@ -29,7 +38,7 @@
       "identifier": "core:path:allow-join",
       "allow": [
         {
-          "path": "$APPDATA"
+          "path": "$APPDATA/**"
         }
       ]
     },
@@ -38,7 +47,7 @@
       "identifier": "core:path:allow-resolve-directory",
       "allow": [
         {
-          "path": "$APPDATA"
+          "path": "$APPDATA/**"
         }
       ]
     }

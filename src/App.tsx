@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import MainLayout from './components/Layout/MainLayout';
 import useConfigStore from './stores/configStore';
+import { conversationService } from './services/conversation';
 
 const App: React.FC = () => {
     const loadConfig = useConfigStore(state => state.loadConfig);
@@ -14,6 +15,9 @@ const App: React.FC = () => {
         initConfig();
     }, [loadConfig]);
 
+    useEffect(() => {
+        conversationService.init();
+    }, []);
 
     return <MainLayout />;
 };
