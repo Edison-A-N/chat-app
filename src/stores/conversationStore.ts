@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { mkdir, writeTextFile, readTextFile, readDir } from '@tauri-apps/plugin-fs';
+import { mkdir, writeTextFile, readTextFile, readDir, remove } from '@tauri-apps/plugin-fs';
 import { appDataDir, join } from '@tauri-apps/api/path';
 import { Message, Conversation } from '../types/conversation';
 interface ConversationStore {
@@ -19,6 +19,7 @@ interface ConversationStore {
     setCurrentChat: (chat: Conversation | null) => void;
     createNewChat: (subject: string, messages: Message[]) => Promise<void>;
     updateCurrentChat: (messages: Message[]) => Promise<void>;
+    deleteConversation: (id: string) => Promise<void>;
 }
 
 function generateId(length: number = 16): string {
@@ -132,5 +133,18 @@ export const useConversationStore = create<ConversationStore>((set, get) => ({
 
         await get().updateConversation(updatedChat);
         set({ currentChat: updatedChat });
+    },
+
+    deleteConversation: async (id: string) => {
+        const appData = await appDataDir();
+        const conversationDir = await join(appData, 'conversations');
+        const filePath = await join(conversationDir, `${id}.json`);
+
+        await remove(filePath);
+
+        set(state => ({
+            conversations: state.conversations.filter(c => c.id !== id),
+            currentChat: state.currentChat?.id === id ? null : state.currentChat
+        }));
     },
 }));

@@ -4,11 +4,13 @@ import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
     SettingOutlined,
-    PlusOutlined
+    PlusOutlined,
+    DeleteOutlined
 } from '@ant-design/icons';
 import styles from './Sidebar.module.css';
 import { useConversationStore } from '../stores/conversationStore';
 import { Conversation } from '../types/conversation';
+import { formatDateTime } from '../utils/datetime';
 
 const { Sider } = Layout;
 
@@ -20,7 +22,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse, onNewChat, onSettingsClick }) => {
-    const { conversations, loading, init, setCurrentChat, currentChat } = useConversationStore();
+    const { conversations, loading, init, setCurrentChat, currentChat, deleteConversation } = useConversationStore();
 
     useEffect(() => {
         init();
@@ -34,6 +36,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse, onNewChat, onS
 
     const handleConversationClick = (conversation: Conversation) => {
         setCurrentChat(conversation);
+    };
+
+    const handleDelete = async (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        await deleteConversation(id);
     };
 
     return (
@@ -67,22 +74,36 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse, onNewChat, onS
 
                 <div className={styles.conversationList}>
                     {!loading && recentConversations.map((conv) => (
-                        <Button
+                        <div
                             key={conv.id}
-                            type="text"
-                            block
-                            className={`
-                                ${styles.conversationItem}
-                                ${collapsed ? styles.collapsedItem : ''}
-                                ${currentChat?.id === conv.id ? styles.activeItem : ''}
-                            `}
-                            title={conv.subject}
-                            onClick={() => handleConversationClick(conv)}
+                            className={`${styles.conversationWrapper} ${currentChat?.id === conv.id ? styles.activeItem : ''}`}
                         >
-                            <span className={styles.conversationSubject}>
-                                {getShortSubject(conv.subject)}
-                            </span>
-                        </Button>
+                            <Button
+                                type="text"
+                                block
+                                className={`
+                                    ${styles.conversationItem}
+                                    ${collapsed ? styles.collapsedItem : ''}
+                                `}
+                                title={`${conv.subject}${collapsed ? '\n' + formatDateTime(conv.timestamp) : ''}`}
+                                onClick={() => handleConversationClick(conv)}
+                            >
+                                <div className={styles.conversationContent}>
+                                    <span className={styles.conversationSubject}>
+                                        {getShortSubject(conv.subject)}
+                                    </span>
+                                    {!collapsed && (
+                                        <span className={styles.conversationTime}>
+                                            {formatDateTime(conv.timestamp)}
+                                        </span>
+                                    )}
+                                </div>
+                            </Button>
+                            <DeleteOutlined
+                                className={`${styles.deleteIcon} ${collapsed ? styles.collapsedDeleteIcon : ''}`}
+                                onClick={(e) => handleDelete(e, conv.id)}
+                            />
+                        </div>
                     ))}
                 </div>
             </div>

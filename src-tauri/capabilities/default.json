@@ -41,6 +41,15 @@
         }
       ]
     },
+    "fs:allow-remove",
+    {
+      "identifier": "fs:allow-remove",
+      "allow": [
+        {
+          "path": "$APPDATA/**"
+        }
+      ]
+    },
     "core:path:default",
     "core:path:allow-join",
     {

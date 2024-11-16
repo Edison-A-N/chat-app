@@ -142,3 +142,100 @@
 .activeItem:active {
     transform: scale(0.99);
 }
+
+.deleteIcon {
+    position: absolute;
+    right: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.conversationItem:hover .deleteIcon {
+    opacity: 1;
+}
+
+.deleteIcon:hover {
+    color: #ff4d4f;
+}
+
+.sidebarItem {
+    position: relative;
+}
+
+.deleteBtn {
+    opacity: 0;
+}
+
+.collapsedDelete {
+    opacity: 0;
+    position: absolute;
+    right: 4px;
+}
+
+.sidebarItem:hover .deleteBtn,
+.sidebarItem:hover .collapsedDelete {
+    opacity: 1;
+}
+
+.itemContent {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.conversationWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 2px 0;
+}
+
+.conversationItem {
+    flex: 1;
+    /* 其他样式保持不变 */
+}
+
+.deleteIcon {
+    opacity: 0;
+    position: absolute;
+    right: 8px;
+    z-index: 2;
+    cursor: pointer;
+    padding: 4px;
+    transition: all 0.2s;
+}
+
+.collapsedDeleteIcon {
+    right: 4px;
+}
+
+.conversationWrapper:hover .deleteIcon {
+    opacity: 1;
+}
+
+.deleteIcon:hover {
+    color: #ff4d4f;
+    transform: scale(1.1);
+}
+
+.conversationContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  gap: 4px;
+}
+
+.conversationTime {
+  font-size: 12px;
+  color: #999;
+}
+
+.conversationSubject {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
