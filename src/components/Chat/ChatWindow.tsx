@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Card, Input, Button, List, Avatar, message } from 'antd';
 import { SendOutlined, UserOutlined, RobotOutlined, StopOutlined } from '@ant-design/icons';
 import { LLMServiceFactoryImpl } from '../../services/llm/factory';
@@ -25,9 +25,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
     const inputRef = useRef<any>(null);
     const [currentStreamingContent, setCurrentStreamingContent] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
+    const currentProviderRef = useRef<string>();
 
-    const config = useConfigStore.getState().config;
-    const llmService = LLMServiceFactoryImpl.getInstance().createService(config.llm.provider);
+    const provider = useConfigStore((state) => state.config.llm.provider);
+    const llmService = useMemo(() =>
+        LLMServiceFactoryImpl.getInstance().createService(provider),
+        [provider]
+    );
+
+    useEffect(() => {
+        if (currentProviderRef.current && currentProviderRef.current !== provider) {
+            handleNewChat();
+        }
+        currentProviderRef.current = provider;
+    }, [provider]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
