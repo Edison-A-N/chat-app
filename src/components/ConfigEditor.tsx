@@ -9,7 +9,7 @@ interface ConfigEditorProps {
     onClose: () => void;
 }
 
-const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved }) => {
+const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved, onClose }) => {
     const [form] = Form.useForm();
     const { loading, loadConfig, saveConfig, config } = useConfigStore();
     const [currentProvider, setCurrentProvider] = useState<string>(config.llm.provider);
@@ -36,6 +36,20 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved }) => {
 
         initializeForm();
     }, [form]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const container = document.querySelector(`.${styles.container}`);
+            if (container && !container.contains(event.target as Node)) {
+                onClose();
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [onClose]);
 
     const handleSubmit = async (values: UserConfig) => {
         try {

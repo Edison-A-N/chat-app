@@ -12,6 +12,9 @@
 }
 
 .container {
+    position: relative;
+    height: 100%;
+    z-index: 1000;
     background: white;
     padding: 24px;
     border-radius: 8px;
@@ -19,7 +22,6 @@
     max-width: 800px;
     max-height: 90vh;
     overflow-y: auto;
-    height: 100%;
 }
 
 .closeButton {
@@ -36,6 +38,5 @@
 .footer {
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
-    margin-top: 24px;
+    margin-top: 16px;
 }
