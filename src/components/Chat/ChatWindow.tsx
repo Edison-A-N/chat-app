@@ -90,23 +90,25 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
         setCurrentStreamingContent('');
 
         try {
-            const assistantMessage: ChatMessage = {
-                role: 'assistant',
-                content: '',
-                timestamp: Date.now(),
-                error: false
-            };
-            setMessages(prev => [...prev, assistantMessage]);
-
             const messageHistory = messages.map(msg => ({
                 role: msg.role,
                 content: msg.content
             }));
             messageHistory.push({ role: 'user', content: inputValue.trim() });
 
+            let isFirstChunk = true;
             await llmService.streamChat(
                 messageHistory,
                 (chunk: string, isComplete: boolean) => {
+                    if (isFirstChunk) {
+                        setMessages(prev => [...prev, {
+                            role: 'assistant',
+                            content: '',
+                            timestamp: Date.now(),
+                            error: false
+                        }]);
+                        isFirstChunk = false;
+                    }
                     setCurrentStreamingContent(chunk);
                     if (isComplete) {
                         setMessages(prev => prev.map((msg, index) => {
