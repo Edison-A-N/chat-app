@@ -40,7 +40,11 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved, onClose }) => {
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const container = document.querySelector(`.${styles.container}`);
-            if (container && !container.contains(event.target as Node)) {
+            const selectDropdown = document.querySelector('.ant-select-dropdown');
+
+            if (container &&
+                !container.contains(event.target as Node) &&
+                !selectDropdown?.contains(event.target as Node)) {
                 onClose();
             }
         };
