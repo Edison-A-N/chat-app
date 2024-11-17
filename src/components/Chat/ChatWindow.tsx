@@ -57,6 +57,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
         }
     }, [currentChat]);
 
+    useEffect(() => {
+        if (currentChat?.content.provider && currentChat.content.provider !== provider) {
+            message.warning('LLM provider mismatch. Starting a new chat with current provider.');
+            handleNewChat();
+        }
+    }, [currentChat]);
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
