@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Card, message, Spin, Collapse, Select } from 'antd';
+import { Form, Input, Button, Card, message, Spin, Collapse, Select, Switch } from 'antd';
 import { UserConfig } from '../types/config';
 import { useConfigStore } from '../stores/configStore';
 import styles from './ConfigEditor.module.css';
@@ -72,6 +72,8 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved, onClose }) => {
             newKeys.push('aws');
         } else if (value === 'gemini') {
             newKeys.push('google');
+        } else if (value === 'azure') {
+            newKeys.push('azure');
         }
         setManualExpandedKeys(newKeys);
     };
@@ -110,6 +112,7 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved, onClose }) => {
                         >
                             <Select onChange={handleProviderChange}>
                                 <Select.Option value="bedrock">Amazon Bedrock (Claude)</Select.Option>
+                                <Select.Option value="azure">Azure OpenAI</Select.Option>
                                 <Select.Option value="gemini">Google Gemini</Select.Option>
                             </Select>
                         </Form.Item>
@@ -241,6 +244,43 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved, onClose }) => {
                                         >
                                             <Input.Password placeholder="Enter Google API Key" />
                                         </Form.Item>
+                                    )
+                                },
+                                {
+                                    key: 'azure',
+                                    label: 'Azure OpenAI Configuration',
+                                    forceRender: true,
+                                    children: (
+                                        <>
+                                            <Form.Item
+                                                label="API Key"
+                                                name={['azure', 'apiKey']}
+                                                rules={[{ required: currentProvider === 'azure', message: 'Please enter Azure OpenAI API Key' }]}
+                                            >
+                                                <Input.Password placeholder="Enter Azure OpenAI API Key" />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="Endpoint"
+                                                name={['azure', 'endpoint']}
+                                                rules={[{ required: currentProvider === 'azure', message: 'Please enter Azure OpenAI Endpoint' }]}
+                                            >
+                                                <Input placeholder="https://your-resource.openai.azure.com" />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="Model"
+                                                name={['azure', 'model']}
+                                                rules={[{ required: currentProvider === 'azure', message: 'Please enter Model name' }]}
+                                            >
+                                                <Input placeholder="Enter model name" />
+                                            </Form.Item>
+                                            <Form.Item
+                                                label="Enable Streaming"
+                                                name={['azure', 'stream']}
+                                                valuePropName="checked"
+                                            >
+                                                <Switch defaultChecked />
+                                            </Form.Item>
+                                        </>
                                     )
                                 },
                                 {

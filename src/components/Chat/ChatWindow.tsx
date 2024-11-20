@@ -31,7 +31,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [inputReady, setInputReady] = useState(false);
 
-    const provider = useConfigStore((state) => state.config.llm.provider);
+    const provider = useConfigStore((state) => state.config.llm.provider) as "bedrock" | "gemini" | "azure";
     const llmService = useMemo(() =>
         LLMServiceFactoryImpl.getInstance().createService(provider),
         [provider]

@@ -21,10 +21,22 @@ export interface UserConfig {
         maxHistoryLength: number;
     };
     llm: {
-        provider: 'bedrock' | 'gemini';
+        provider: LLMProvider;
+    };
+    azure?: {
+        apiKey: string;
+        endpoint: string;
+        model: string;
     };
 }
 
 export type DeepPartial<T> = {
     [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
+
+export type LLMProvider = "bedrock" | "gemini" | "azure";
+
+export interface LLMConfig {
+    provider: LLMProvider;
+    // ... other config properties
+}

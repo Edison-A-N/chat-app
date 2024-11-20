@@ -19,6 +19,12 @@ export const defaultConfig: UserConfig = {
     google: {
         apiKey: ''
     },
+    azure: {
+        apiKey: '',
+        endpoint: '',
+        model: '',
+        stream: true
+    },
     llm: {
         provider: 'bedrock'
     },
