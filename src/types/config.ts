@@ -12,6 +12,7 @@ export interface UserConfig {
             topP: number;
             stopSequences: string[];
             anthropicVersion: string;
+            endpoint?: string;
         };
     };
     google: {

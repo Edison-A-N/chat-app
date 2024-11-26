@@ -226,6 +226,13 @@ const ConfigEditor: React.FC<ConfigEditorProps> = ({ onSaved, onClose }) => {
                                             >
                                                 <Input placeholder="e.g., bedrock-2023-05-31" />
                                             </Form.Item>
+
+                                            <Form.Item
+                                                label="Bedrock Endpoint (Optional)"
+                                                name={['aws', 'bedrock', 'endpoint']}
+                                            >
+                                                <Input placeholder="https://bedrock.us-east-1.amazonaws.com" />
+                                            </Form.Item>
                                         </>
                                     )
                                 },

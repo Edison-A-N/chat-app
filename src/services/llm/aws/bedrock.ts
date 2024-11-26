@@ -1,4 +1,4 @@
-import { BedrockRuntimeClient, InvokeModelCommand, InvokeModelWithResponseStreamCommand } from "@aws-sdk/client-bedrock-runtime";
+import { BedrockRuntimeClient, InvokeModelCommand, InvokeModelWithResponseStreamCommand, BedrockRuntimeClientConfig } from "@aws-sdk/client-bedrock-runtime";
 import { PromptResponse, LLMService, Message } from '../types';
 import { useConfigStore } from '../../../stores/configStore';
 
@@ -19,21 +19,26 @@ function convertMessagesToBedrockFormat(messages: Message[]) {
 // Create a function to initialize the client
 async function createBedrockClient() {
     const state = useConfigStore.getState();
-    console.log('Creating Bedrock client with config:', state.config);  // 调试日志
 
-    // 注意这里的路径应该是 config.aws.credentials
     const awsConfig = state.config.aws;
     if (!awsConfig?.credentials?.accessKeyId || !awsConfig?.credentials?.secretAccessKey) {
         throw new Error('AWS credentials not found in config. Please check your configuration.');
     }
 
-    return new BedrockRuntimeClient({
+    const clientConfig: BedrockRuntimeClientConfig = {
         region: awsConfig.region,
         credentials: {
             accessKeyId: awsConfig.credentials.accessKeyId,
             secretAccessKey: awsConfig.credentials.secretAccessKey
         }
-    });
+    };
+
+    // Add endpoint if configured
+    if (awsConfig.bedrock?.endpoint) {
+        clientConfig.endpoint = awsConfig.bedrock.endpoint;
+    }
+
+    return new BedrockRuntimeClient(clientConfig);
 }
 
 // Initialize the client
@@ -43,11 +48,9 @@ let client: BedrockRuntimeClient | null = null;
 async function getClient() {
     if (!configInitialized) {
         const state = useConfigStore.getState();
-        console.log('Initial state:', state);  // 调试日志
 
         // 如果配置正在加载，等待加载完成
         if (state.loading) {
-            console.log('Waiting for config to load...');
             await new Promise<void>((resolve) => {
                 const unsubscribe = useConfigStore.subscribe((state) => {
                     if (!state.loading) {
@@ -76,7 +79,6 @@ async function getClient() {
                         prevAws?.credentials?.secretAccessKey !== currentAws?.credentials?.secretAccessKey ||
                         prevAws?.region !== currentAws?.region
                     ) {
-                        console.log('AWS config changed, will recreate client');
                         client = null;
                     }
                 });
@@ -138,7 +140,6 @@ export const getStreamingResponseFromBedrock = async (
         const bedrockClient = await getClient();
         const config = useConfigStore.getState().config;
         const bedrockConfig = config.aws.bedrock;
-        console.log('aws', config.aws);
 
         const payload = {
             max_tokens: bedrockConfig.maxTokens,
