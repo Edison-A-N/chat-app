@@ -28,6 +28,7 @@ export interface UserConfig {
         apiKey: string;
         endpoint: string;
         model: string;
+        stream: boolean;
     };
 }
 
