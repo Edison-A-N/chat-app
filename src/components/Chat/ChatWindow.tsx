@@ -240,6 +240,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
 
+    useEffect(() => {
+        const unsubscribe = useConfigStore.subscribe(
+            (state, prevState) => {
+                if (JSON.stringify(state.config) !== JSON.stringify(prevState.config)) {
+                    handleNewChat();
+                }
+            }
+        );
+
+        return () => unsubscribe();
+    }, []);
+
     return (
         <Card
             style={{
