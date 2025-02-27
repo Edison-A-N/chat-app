@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Card, Input, Button, List, Avatar, message } from 'antd';
+import { Card, Input, Button, List, Avatar, message, Alert } from 'antd';
 import { SendOutlined, UserOutlined, RobotOutlined, StopOutlined, ExpandAltOutlined, ShrinkOutlined } from '@ant-design/icons';
 import { LLMServiceFactoryImpl } from '../../services/llm/factory';
 import { useConfigStore } from '../../stores/configStore';
@@ -252,6 +252,37 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
         return () => unsubscribe();
     }, []);
 
+    const renderMarkdownContent = (content: string) => {
+        // Replace <think>...</think> with custom rendering
+        const parts = content.split(/(<think>.*?<\/think>)/s);
+        return (
+            <>
+                {parts.map((part, index) => {
+                    if (part.startsWith('<think>') && part.endsWith('</think>')) {
+                        const thoughtContent = part.replace(/<\/?think>/g, '').trim();
+                        return (
+                            <Alert
+                                key={index}
+                                message={thoughtContent}
+                                type="info"
+                                style={{
+                                    marginBottom: '12px',
+                                    backgroundColor: '#f0f7ff',
+                                    border: '1px solid #91caff'
+                                }}
+                            />
+                        );
+                    }
+                    return part ? (
+                        <ReactMarkdown key={index} className="markdown-content">
+                            {part}
+                        </ReactMarkdown>
+                    ) : null;
+                })}
+            </>
+        );
+    };
+
     return (
         <Card
             style={{
@@ -283,11 +314,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                                                 {item.role === 'user' ? (
                                                     item.content
                                                 ) : (
-                                                    <ReactMarkdown className="markdown-content">
-                                                            {index === messages.length - 1 && isGenerating
-                                                                ? currentStreamingContent
-                                                            : item.content}
-                                                    </ReactMarkdown>
+                                                        index === messages.length - 1 && isGenerating
+                                                            ? renderMarkdownContent(currentStreamingContent)
+                                                            : renderMarkdownContent(item.content)
                                                 )}
                                             </div>
                                             <div className={styles.messageTimestamp}>
