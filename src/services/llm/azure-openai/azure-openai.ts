@@ -97,16 +97,19 @@ export class AzureOpenAIService implements LLMService {
                 signal: this.abortController.signal
             });
 
+            let accumulatedContent = '';
+
             for await (const chunk of stream) {
                 if (this.abortController.signal.aborted) {
                     return;
                 }
                 const content = chunk.choices[0]?.delta?.content || '';
                 if (content) {
-                    onChunk(content, false);
+                    accumulatedContent += content;
+                    onChunk(accumulatedContent, false);
                 }
             }
-            onChunk('', true);
+            onChunk(accumulatedContent, true);
         } catch (error) {
             if ((error as any)?.name !== 'AbortError') {
                 console.error('Azure OpenAI stream chat error:', error);
