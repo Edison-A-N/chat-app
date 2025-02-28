@@ -223,6 +223,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
         setIsGenerating(false);
         setLoading(false);
         setCurrentChat(null);
+        focusInput();
         if (onNewChat) {
             onNewChat();
         }

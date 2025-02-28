@@ -43,6 +43,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse, onNewChat, onS
         await deleteConversation(id);
     };
 
+    const handleNewChat = () => {
+        setCurrentChat(null);
+        onNewChat();
+    };
+
     return (
         <Sider
             trigger={null}
@@ -67,7 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse, onNewChat, onS
                     icon={<PlusOutlined />}
                     block
                     className={styles.actionButton}
-                    onClick={onNewChat}
+                    onClick={handleNewChat}
                 >
                     {!collapsed && '新建对话'}
                 </Button>
