@@ -254,33 +254,40 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
     }, []);
 
     const renderMarkdownContent = (content: string) => {
-        // Replace <think>...</think> with custom rendering
-        const parts = content.split(/(<think>.*?<\/think>)/s);
+        const parts = content.split(/(<think>|<\/think>)/);
+        let isInThinkBlock = false;
+
         return (
-            <>
+            <div className={styles.messageContentWrapper}>
                 {parts.map((part, index) => {
-                    if (part.startsWith('<think>') && part.endsWith('</think>')) {
-                        const thoughtContent = part.replace(/<\/?think>/g, '').trim();
+                    if (part === '<think>') {
+                        isInThinkBlock = true;
+                        return null;
+                    } else if (part === '</think>') {
+                        isInThinkBlock = false;
+                        return null;
+                    }
+
+                    if (isInThinkBlock) {
                         return (
                             <Alert
-                                key={index}
-                                message={thoughtContent}
+                                key={`thinking-${index}`}
+                                message={part.trim()}
                                 type="info"
-                                style={{
-                                    marginBottom: '12px',
-                                    backgroundColor: '#f0f7ff',
-                                    border: '1px solid #91caff'
-                                }}
+                                className={styles.thinkBlock}
                             />
                         );
                     }
+
                     return part ? (
-                        <ReactMarkdown key={index} className="markdown-content">
-                            {part}
-                        </ReactMarkdown>
+                        <div key={index} className={styles.markdownWrapper}>
+                            <ReactMarkdown className="markdown-content">
+                                {part}
+                            </ReactMarkdown>
+                        </div>
                     ) : null;
                 })}
-            </>
+            </div>
         );
     };
 

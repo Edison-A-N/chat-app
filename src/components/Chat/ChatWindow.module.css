@@ -169,3 +169,19 @@
     background-color: #fff2f0;
     border: 1px solid #ffccc7;
 }
+
+.messageContentWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.thinkBlock {
+    background-color: #f0f7ff;
+    border: 1px solid #91caff;
+    margin: 0;
+}
+
+.markdownWrapper {
+    flex: 1;
+}
