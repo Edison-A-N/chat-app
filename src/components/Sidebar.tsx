@@ -5,7 +5,8 @@ import {
     MenuUnfoldOutlined,
     SettingOutlined,
     PlusOutlined,
-    DeleteOutlined
+    DeleteOutlined,
+    EditOutlined
 } from '@ant-design/icons';
 import styles from './Sidebar.module.css';
 import { useConversationStore } from '../stores/conversationStore';
@@ -22,7 +23,9 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse, onNewChat, onSettingsClick }) => {
-    const { conversations, loading, init, setCurrentChat, currentChat, deleteConversation } = useConversationStore();
+    const { conversations, loading, init, setCurrentChat, currentChat, deleteConversation, updateConversation } = useConversationStore();
+    const [editingId, setEditingId] = React.useState<string | null>(null);
+    const [editingTitle, setEditingTitle] = React.useState('');
 
     useEffect(() => {
         init();
@@ -46,6 +49,23 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse, onNewChat, onS
     const handleNewChat = () => {
         setCurrentChat(null);
         onNewChat();
+    };
+
+    const handleEdit = (e: React.MouseEvent, conv: Conversation) => {
+        e.stopPropagation();
+        setEditingId(conv.id);
+        setEditingTitle(conv.subject);
+    };
+
+    const handleEditSubmit = async (conv: Conversation) => {
+        if (editingTitle.trim()) {
+            await updateConversation({
+                ...conv,
+                subject: editingTitle.trim()
+            });
+        }
+        setEditingId(null);
+        setEditingTitle('');
     };
 
     return (
@@ -94,9 +114,21 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse, onNewChat, onS
                                 onClick={() => handleConversationClick(conv)}
                             >
                                 <div className={styles.conversationContent}>
-                                    <span className={styles.conversationSubject}>
-                                        {getShortSubject(conv.subject)}
-                                    </span>
+                                    {editingId === conv.id ? (
+                                        <input
+                                            className={styles.titleInput}
+                                            value={editingTitle}
+                                            onChange={(e) => setEditingTitle(e.target.value)}
+                                            onBlur={() => handleEditSubmit(conv)}
+                                            onKeyPress={(e) => e.key === 'Enter' && handleEditSubmit(conv)}
+                                            onClick={(e) => e.stopPropagation()}
+                                            autoFocus
+                                        />
+                                    ) : (
+                                            <span className={styles.conversationSubject}>
+                                                {getShortSubject(conv.subject)}
+                                            </span>
+                                    )}
                                     {!collapsed && (
                                         <span className={styles.conversationTime}>
                                             {formatDateTime(conv.timestamp)}
@@ -104,10 +136,16 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse, onNewChat, onS
                                     )}
                                 </div>
                             </Button>
-                            <DeleteOutlined
-                                className={`${styles.deleteIcon} ${collapsed ? styles.collapsedDeleteIcon : ''}`}
-                                onClick={(e) => handleDelete(e, conv.id)}
-                            />
+                            <div className={styles.iconGroup}>
+                                <EditOutlined
+                                    className={`${styles.editIcon} ${collapsed ? styles.collapsedIcon : ''}`}
+                                    onClick={(e) => handleEdit(e, conv)}
+                                />
+                                <DeleteOutlined
+                                    className={`${styles.deleteIcon} ${collapsed ? styles.collapsedIcon : ''}`}
+                                    onClick={(e) => handleDelete(e, conv.id)}
+                                />
+                            </div>
                         </div>
                     ))}
                 </div>
