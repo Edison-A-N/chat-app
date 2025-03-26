@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { mkdir, writeTextFile, readTextFile, readDir, remove } from '@tauri-apps/plugin-fs';
 import { appDataDir, join } from '@tauri-apps/api/path';
 import { Message, Conversation } from '../types/conversation';
-import { useConfigStore } from '../stores/configStore';
 
 interface ConversationStore {
     conversations: Conversation[];
@@ -74,14 +73,12 @@ export const useConversationStore = create<ConversationStore>((set, get) => ({
     },
 
     saveConversation: async (subject, messages, options = {}) => {
-        const provider = useConfigStore.getState().config.llm.provider;
         const conversation: Conversation = {
             id: generateId(),
             subject,
             timestamp: Date.now(),
             content: {
                 messages,
-                provider,
                 ...options
             }
         };

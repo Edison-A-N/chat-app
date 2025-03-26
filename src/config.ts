@@ -1,24 +1,13 @@
 export interface UserConfig {
-    aws: {
-        region: string;
-        credentials: {
-            accessKeyId: string;
-            secretAccessKey: string;
-        };
-        bedrock: {
-            modelId: string;
-            maxTokens: number;
-            temperature: number;
-            topP: number;
-            stopSequences: string[];
-            anthropicVersion: string;
-        };
-    };
-    google: {
+    openai: {
         apiKey: string;
-    };
-    llm: {
-        provider: 'bedrock' | 'gemini';
+        endpoint: string;
+        modelId: string;
+        maxTokens: number;
+        temperature: number;
+        topP: number;
+        stopSequences: string[];
+        stream: boolean;
     };
     chat: {
         maxHistoryLength: number;

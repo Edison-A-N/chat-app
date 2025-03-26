@@ -1,6 +1,5 @@
 export interface ConversationContent {
     messages: Message[];
-    provider: string;
     model?: string;
     temperature?: number;
     systemPrompt?: string;

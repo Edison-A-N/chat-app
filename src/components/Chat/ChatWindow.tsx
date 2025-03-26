@@ -27,24 +27,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
     const inputRef = useRef<any>(null);
     const [currentStreamingContent, setCurrentStreamingContent] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
-    const currentProviderRef = useRef<string>();
     const [isExpanded, setIsExpanded] = useState(false);
     const [inputReady, setInputReady] = useState(false);
 
-    const provider = useConfigStore((state) => state.config.llm.provider) as "bedrock" | "gemini" | "azure";
     const llmService = useMemo(() =>
-        LLMServiceFactoryImpl.getInstance().createService(provider),
-        [provider]
+        LLMServiceFactoryImpl.getInstance().createService(),
+        []
     );
 
     const { currentChat, createNewChat, updateCurrentChat, setCurrentChat } = useConversationStore();
 
-    useEffect(() => {
-        if (currentProviderRef.current && currentProviderRef.current !== provider) {
-            handleNewChat();
-        }
-        currentProviderRef.current = provider;
-    }, [provider]);
 
     useEffect(() => {
         if (currentChat) {
@@ -57,12 +49,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
         }
     }, [currentChat]);
 
-    useEffect(() => {
-        if (currentChat?.content.provider && currentChat.content.provider !== provider) {
-            message.warning('LLM provider mismatch. Starting a new chat with current provider.');
-            handleNewChat();
-        }
-    }, [currentChat]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
