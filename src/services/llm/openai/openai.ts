@@ -54,6 +54,10 @@ export class OpenAIService implements LLMService {
         OpenAIService.instance = null;
     }
 
+    messageBuilder(systemMessage?: string): MessageBuilder {
+        return new MessageBuilder(systemMessage);
+    }
+
     async chat(messages: Message[]): Promise<string> {
         if (!this.client) {
             this.initClient();
@@ -131,5 +135,53 @@ export class OpenAIService implements LLMService {
             this.abortController.abort();
             this.abortController = null;
         }
+    }
+}
+
+class MessageBuilder {
+    private messages: Message[] = [];
+
+    constructor(systemMessage?: string) {
+        if (systemMessage) {
+            if (typeof systemMessage === 'string') {
+                this.addSystemMessage(systemMessage);
+            } else {
+                throw new Error('System message must be a string');
+            }
+        }
+    }
+
+    addSystemMessage(content: string): MessageBuilder {
+        this.messages.push({
+            role: 'system',
+            content: content,
+            timestamp: Date.now()
+        });
+        return this;
+    }
+
+    addUserMessage(content: string): MessageBuilder {
+        this.messages.push({
+            role: 'user',
+            content: content,
+            timestamp: Date.now()
+        });
+        return this;
+    }
+
+    addAssistantMessage(content: string): MessageBuilder {
+        this.messages.push({
+            role: 'assistant',
+            content: content,
+            timestamp: Date.now()
+        });
+        return this;
+    }
+
+    /**
+     * Build the final message array
+     */
+    build(): Message[] {
+        return [...this.messages];
     }
 }

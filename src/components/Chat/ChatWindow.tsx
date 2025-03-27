@@ -9,7 +9,7 @@ import ReactMarkdown from 'react-markdown';
 import '../../styles/markdown.css';
 
 interface ChatMessage {
-    role: 'user' | 'assistant';
+    role: 'user' | 'assistant' | 'system';
     content: string;
     timestamp: number;
     error?: boolean;
@@ -90,6 +90,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
             timestamp: Date.now(),
         };
 
+        let isNewChat = messages.length === 0;
+        if (isNewChat) {
+            messages.push(llmService.messageBuilder().addSystemMessage("You are a helpful assistant that answers questions and helps with tasks.").build()[0]);
+        }
+
         const newMessages = [...messages, userMessage];
         setMessages(newMessages);
         setInputValue('');
@@ -105,7 +110,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
             }));
 
             let isFirstChunk = true;
-            let isNewChat = messages.length === 0;
 
             await llmService.streamChat(
                 messageHistory,
@@ -122,12 +126,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
 
                         if (isNewChat) {
                             const subject = userMessage.content.slice(0, 30) + (userMessage.content.length > 30 ? '...' : '');
-                            const initialAssistantMessage = {
-                                role: 'assistant' as const,
-                                content: chunk,
-                                timestamp: Date.now()
-                            };
-                            createNewChat(subject, [...messageHistory, initialAssistantMessage]);
+                            createNewChat(subject, [...messages, assistantMessage]);
                         }
                     }
 
