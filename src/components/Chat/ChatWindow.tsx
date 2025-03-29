@@ -84,26 +84,28 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
     const handleSend = async () => {
         if (!inputValue.trim()) return;
 
-        const userMessage: ChatMessage = {
-            role: 'user',
-            content: inputValue.trim(),
-            timestamp: Date.now(),
-        };
+        const userMessageContent = inputValue.trim();
 
         let isNewChat = messages.length === 0;
         if (isNewChat) {
-            messages.push(llmService.messageBuilder().addSystemMessage("You are a helpful assistant that answers questions and helps with tasks.").build()[0]);
+            messages.push(...llmService.messageBuilder().addSystemMessage("You are a helpful assistant that answers questions and helps with tasks.")
+                .addUserMessage(userMessageContent)
+                .build());
+            const subject = userMessageContent.slice(0, 30) + (userMessageContent.length > 30 ? '...' : '');
+            createNewChat(subject, [...messages]);
+
+        } else {
+            messages.push(...llmService.messageBuilder().addUserMessage(userMessageContent).build());
         }
 
-        const newMessages = [...messages, userMessage];
-        setMessages(newMessages);
+        setMessages(messages);
         setInputValue('');
         setLoading(true);
         setIsGenerating(true);
         setCurrentStreamingContent('');
 
         try {
-            const messageHistory = newMessages.map(msg => ({
+            const messageHistory = messages.map(msg => ({
                 role: msg.role,
                 content: msg.content,
                 timestamp: msg.timestamp,
@@ -123,11 +125,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                         };
                         setMessages(prev => [...prev, assistantMessage]);
                         isFirstChunk = false;
-
-                        if (isNewChat) {
-                            const subject = userMessage.content.slice(0, 30) + (userMessage.content.length > 30 ? '...' : '');
-                            createNewChat(subject, [...messages, assistantMessage]);
-                        }
                     }
 
                     setCurrentStreamingContent(chunk);
@@ -290,8 +287,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                     <List
                         itemLayout="horizontal"
                         dataSource={messages}
-                        renderItem={(item, index) => (
-                            <List.Item
+                        renderItem={(item, index) => {
+                            if (item.role === 'system') return null;
+
+                            return (
+                                <List.Item
                                 className={`
                                     ${item.role === 'user' ? styles.userMessage : styles.assistantMessage}
                                     ${item.error ? styles.errorMessage : ''}
@@ -318,8 +318,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                                         </div>
                                     }
                                 />
-                            </List.Item>
-                        )}
+                                </List.Item>
+                            );
+                        }}
                     />
                     <div ref={messagesEndRef} />
                 </div>
