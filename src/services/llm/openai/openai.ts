@@ -58,42 +58,39 @@ export class OpenAIService implements LLMService {
         return new MessageBuilder(systemMessage);
     }
 
-    async chat(messages: Message[]): Promise<string> {
-        if (!this.client) {
-            this.initClient();
-        }
-
-        try {
-            const params: ChatCompletionCreateParams = {
-                messages: messages.map(msg => ({
-                    role: msg.role as any,
-                    content: msg.content
-                })),
-                model: this.config?.openai?.modelId || '',
-            };
-
-            const response = await this.client!.chat.completions.create(params);
-            return response.choices[0]?.message?.content || '';
-        } catch (error) {
-            console.error('OpenAI chat error:', error);
-            throw error;
-        }
-    }
-
-    async streamChat(
+    async chat(
         messages: Message[],
-        onChunk: (chunk: string, isComplete: boolean) => void
-    ): Promise<void> {
+        options?: {
+            stream?: boolean;
+            onChunk?: (chunk: string, isComplete: boolean) => void;
+        }
+    ): Promise<string> {
         if (!this.client) {
             this.initClient();
         }
 
+        // If streaming is disabled in config or not requested, use non-streaming
         if (this.config?.openai?.stream === false) {
-            const response = await this.chat(messages);
-            onChunk(response, true);
-            return;
+            try {
+                const params: ChatCompletionCreateParams = {
+                    messages: messages.map(msg => ({
+                        role: msg.role as any,
+                        content: msg.content
+                    })),
+                    model: this.config?.openai?.modelId || '',
+                };
+
+                const response = await this.client!.chat.completions.create(params);
+                const content = response.choices[0]?.message?.content || '';
+                options?.onChunk?.(content, true);
+                return content;
+            } catch (error) {
+                console.error('OpenAI chat error:', error);
+                throw error;
+            }
         }
 
+        // Streaming implementation
         try {
             this.abortController = new AbortController();
             const params: ChatCompletionCreateParams = {
@@ -113,20 +110,22 @@ export class OpenAIService implements LLMService {
 
             for await (const chunk of stream) {
                 if (this.abortController.signal.aborted) {
-                    return;
+                    return accumulatedContent;
                 }
                 const content = chunk.choices[0]?.delta?.content || '';
                 if (content) {
                     accumulatedContent += content;
-                    onChunk(accumulatedContent, false);
+                    options?.onChunk?.(accumulatedContent, false);
                 }
             }
-            onChunk(accumulatedContent, true);
+            options?.onChunk?.(accumulatedContent, true);
+            return accumulatedContent;
         } catch (error) {
             if ((error as any)?.name !== 'AbortError') {
                 console.error('OpenAI stream chat error:', error);
                 throw error;
             }
+            return '';
         }
     }
 

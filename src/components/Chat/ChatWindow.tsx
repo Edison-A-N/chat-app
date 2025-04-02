@@ -113,10 +113,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
 
             let isFirstChunk = true;
 
-            await llmService.streamChat(
+            await llmService.chat(
                 messageHistory,
-                (chunk: string, isComplete: boolean) => {
-                    if (isFirstChunk) {
+                {
+                    onChunk: (chunk: string, isComplete: boolean) => {
+                        if (isFirstChunk) {
                         const assistantMessage: ChatMessage = {
                             role: 'assistant',
                             content: '',
@@ -153,6 +154,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onNewChat }) => {
                         });
                         setIsGenerating(false);
                         focusInput();
+                    }
                     }
                 }
             );

@@ -16,8 +16,12 @@ export interface MessageBuilder {
 }
 
 export interface LLMService {
-    chat(messages: Message[]): Promise<string>;
-    streamChat(messages: Message[], onChunk: (chunk: string, isComplete: boolean) => void): Promise<void>;
+    chat(
+        messages: Message[],
+        options?: {
+            onChunk?: (chunk: string, isComplete: boolean) => void;
+        }
+    ): Promise<string>;
     abortStreaming(): void;
     messageBuilder(systemMessage?: string): MessageBuilder;
 }
