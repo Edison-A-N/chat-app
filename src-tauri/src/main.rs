@@ -3,18 +3,9 @@
 
 use std::env;
 
-#[tauri::command]
-fn get_aws_credentials() -> (String, String) {
-    let access_key = env::var("AWS_ACCESS_KEY_ID").unwrap_or_else(|_| String::from(""));
-    let secret_key = env::var("AWS_SECRET_ACCESS_KEY").unwrap_or_else(|_| String::from(""));
-
-    (access_key, secret_key)
-}
-
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
-        .invoke_handler(tauri::generate_handler![get_aws_credentials])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
