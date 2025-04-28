@@ -1,6 +1,6 @@
 # AI Chat Desktop
 
-A cross-platform desktop chat application built with Tauri + React + TypeScript, powered by AWS Bedrock.
+A cross-platform desktop chat application built with Tauri + React + TypeScript.
 
 ## Features
 
