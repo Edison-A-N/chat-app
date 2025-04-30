@@ -13,6 +13,11 @@ A cross-platform desktop chat application built with Tauri + React + TypeScript.
 - 📱 Responsive design for different screen sizes
 - 🤖 **All code is AI-implemented** ✨
 
+## Documentation
+
+- [Project Milestones](./docs/milestones/README.md) - Development phases and roadmap
+- [CHANGELOG](./CHANGELOG.md) - Version history and changes
+
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) (v16 or higher)

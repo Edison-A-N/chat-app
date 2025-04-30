@@ -1,0 +1,27 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Source Directory Structure
+
+The `src` directory contains the main React/TypeScript application code. Here's the key structure:
+
+## Entry Points
+- [main.tsx](mdc:src/main.tsx) - Application entry point
+- [App.tsx](mdc:src/App.tsx) - Root component with main layout and routing
+- [App.css](mdc:src/App.css) and [App.module.css](mdc:src/App.module.css) - Global and component-specific styles
+
+## Core Directories
+- `components/` - Reusable React components
+- `stores/` - State management stores
+- `services/` - API and service integrations
+- `types/` - TypeScript type definitions
+- `utils/` - Utility functions and helpers
+- `config/` - Application configuration
+- `assets/` - Static assets like images
+- `styles/` - Global styles and theme definitions
+
+## Configuration
+- [config.ts](mdc:src/config.ts) - Central configuration file
+- [vite-env.d.ts](mdc:src/vite-env.d.ts) - Vite environment type declarations
